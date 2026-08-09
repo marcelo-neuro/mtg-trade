@@ -2,7 +2,6 @@ package br.com.marceloneuro.mtgtrade.catalogo.internal.facade;
 
 import br.com.marceloneuro.mtgtrade.catalogo.api.CatalogoFacade;
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
-import br.com.marceloneuro.mtgtrade.catalogo.internal.domain.CartaCatalogo;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.CatalogoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
