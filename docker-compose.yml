@@ -11,7 +11,7 @@ services:
     ports:
       - "${DB_PORT}:5432"
     volumes:
-      - catalogo_data:var/lib/postgresql/data
+      - catalogo_data:/var/lib/postgresql/data
 
 volumes:
   catalogo_data:
