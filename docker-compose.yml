@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "${DB_PORT}:5432"
+      - "${PORT_DB}:5432"
     volumes:
       - catalogo_data:/var/lib/postgresql/data
 
