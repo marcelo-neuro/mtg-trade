@@ -10,6 +10,6 @@ import java.util.UUID;
 
 public interface CatalogoRepository extends JpaRepository<CartaCatalogo, UUID> {
 
-    Page<CartaCatalogo> findByNameContainingIgnoreCase(String nome, Pageable pageable);
+    Page<CartaCatalogo> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
     Optional<CartaCatalogo> findByPrintId(String printId);
 }

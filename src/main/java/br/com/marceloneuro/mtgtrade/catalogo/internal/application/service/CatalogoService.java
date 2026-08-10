@@ -15,7 +15,7 @@ public class CatalogoService {
 
     // Busca cartas no banco pelo nome, buscando o paramêtro nome dentro do campo nome (É como utilizar o LIKE '%valor%')
     public Page<CartaCatalogoDTO> buscarCartasPorNome(String nome, Pageable pageable) {
-        return catalogoRepository.findByNameContainingIgnoreCase(nome, pageable)
+        return catalogoRepository.findByNomeContainingIgnoreCase(nome, pageable)
                 .map(cartaCatalogo -> new CartaCatalogoDTO(
                         cartaCatalogo.getOracleId(),
                         cartaCatalogo.getPrintId(),
