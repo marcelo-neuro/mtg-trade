@@ -1,0 +1,17 @@
+services:
+  postgres-catalogo:
+    image: postgres:15-alpine
+    env_file:
+      - .env
+    container_name: mtg-db-catalogo
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - catalogo_data:var/lib/postgresql/data
+
+volumes:
+  catalogo_data:
