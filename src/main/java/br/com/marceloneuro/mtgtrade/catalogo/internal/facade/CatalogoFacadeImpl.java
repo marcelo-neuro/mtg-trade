@@ -21,7 +21,8 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
                         cartaCatalogo.getPrintId(),
                         cartaCatalogo.getNome(),
                         cartaCatalogo.getEdicao(),
-                        cartaCatalogo.getImagemUrl()
+                        cartaCatalogo.getImagemFrenteUrl(),
+                        cartaCatalogo.getImagemVersoUrl()
                 ))
                 .orElseThrow(() -> new EntityNotFoundException("Print Id não existe. Print Id: " + printId));
     }

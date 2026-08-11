@@ -30,6 +30,9 @@ public class CartaCatalogo {
     @Column(nullable = false)
     private String edicao;
 
-    @Column(nullable = false)
-    private String imagemUrl;
+    @Column(name = "imagem_frente_url",nullable = false)
+    private String imagemFrenteUrl;
+
+    @Column(name = "imagen_verso_url")
+    private String imagemVersoUrl;
 }

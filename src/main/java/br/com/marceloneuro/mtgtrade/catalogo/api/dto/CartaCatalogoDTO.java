@@ -5,6 +5,7 @@ public record CartaCatalogoDTO(
         String printId,
         String nome,
         String edicao,
-        String imagemUrl
+        String imagemFrenteUrl,
+        String imagemVersoUrl
 ) {
 }

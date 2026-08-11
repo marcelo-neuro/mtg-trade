@@ -21,7 +21,8 @@ public class CatalogoService {
                         cartaCatalogo.getPrintId(),
                         cartaCatalogo.getNome(),
                         cartaCatalogo.getEdicao(),
-                        cartaCatalogo.getImagemUrl()
+                        cartaCatalogo.getImagemFrenteUrl(),
+                        cartaCatalogo.getImagemVersoUrl()
                 ));
     }
 }
