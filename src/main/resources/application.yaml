@@ -1,3 +1,20 @@
 spring:
+  config:
+    import: "optional:file:.env[.properties]"
   application:
     name: mtgtrade
+  datasource:
+    url: jdbc:postgresql://${HOST_DB}:${PORT_DB}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database: POSTGRESQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format-sql: true
