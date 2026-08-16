@@ -19,4 +19,21 @@ record CartaScryfallDTO(
         ImageUrisScryfallDTO imageUris,
         List<CardFaceScryfallDTO> cardFaces
 ) {
+
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        record ImageUrisScryfallDTO(
+                @JsonProperty("normal")
+                String normal
+        ) {
+        }
+
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        record CardFaceScryfallDTO(
+                @JsonProperty("normal")
+                ImageUrisScryfallDTO imageUris,
+
+                @JsonProperty("mana_cost")
+                String custoDeMana
+        ) {
+        }
 }
