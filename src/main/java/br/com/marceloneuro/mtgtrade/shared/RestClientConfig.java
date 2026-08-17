@@ -17,4 +17,9 @@ public class RestClientConfig {
                 .defaultHeader(HttpHeaders.USER_AGENT, "Mtg-Trade-projeto/0.1.0")
                 .build();
     }
+    
+    @Bean
+    public RestClient.Builder restClientBuilder() {
+        return RestClient.builder();
+    }
 }
