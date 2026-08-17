@@ -15,8 +15,14 @@ record CartaScryfallDTO(
         String name,
         @JsonProperty("set_name")
         String setName,
+        @JsonProperty("image_status")
+        String imageStatus,
+        @JsonProperty("layout")
+        String layout,
 
+        @JsonProperty("image_uris")
         ImageUrisScryfallDTO imageUris,
+        @JsonProperty("card_faces")
         List<CardFaceScryfallDTO> cardFaces
 ) {
 
@@ -29,11 +35,11 @@ record CartaScryfallDTO(
 
         @JsonIgnoreProperties(ignoreUnknown = true)
         record CardFaceScryfallDTO(
-                @JsonProperty("normal")
-                ImageUrisScryfallDTO imageUris,
+                @JsonProperty("oracle_id")
+                String oracleId,
 
-                @JsonProperty("mana_cost")
-                String custoDeMana
+                @JsonProperty("image_uris")
+                ImageUrisScryfallDTO imageUris
         ) {
         }
 }
