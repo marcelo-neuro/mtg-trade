@@ -1,6 +1,8 @@
 package br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.scryfall;
 
 import br.com.marceloneuro.mtgtrade.catalogo.internal.domain.CartaCatalogo;
+import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.scryfall.exceptions.ScryfallLayoutException;
+import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.scryfall.exceptions.ScryfallMissingImageException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
@@ -15,6 +17,13 @@ class ScryfallParser {
 
     public CartaCatalogo converteLinhaJsonEmCartaCatalogo(String json) {
         CartaScryfallDTO cartaScryfallDto = objectMapper.readValue(json, CartaScryfallDTO.class);
+
+        if ("missing".equals(cartaScryfallDto.imageStatus())) {
+            throw new ScryfallMissingImageException("Carta sem imagem não é suportada.");
+        }
+        if ("art_series".equals(cartaScryfallDto.layout())) {
+            throw new ScryfallLayoutException("Layout de carta não suportado.");
+        }
 
         CartaCatalogo cartaCatalogoConvertida = new CartaCatalogo();
 
@@ -35,13 +44,22 @@ class ScryfallParser {
     }
 
     private void converteCartaDuplaFace(CartaCatalogo cartaCatalogoConvertida, List<CartaScryfallDTO.CardFaceScryfallDTO> cardFaceScryfallDto) {
-        cardFaceScryfallDto.forEach(face -> {
-            if (face.custoDeMana().isBlank()) {
-                cartaCatalogoConvertida.setImagemVersoUrl(face.imageUris().normal());
-            }
-            if (!face.custoDeMana().isBlank()) {
-                cartaCatalogoConvertida.setImagemFrenteUrl(face.imageUris().normal());
-            }
-        });
+        if (cardFaceScryfallDto == null || cardFaceScryfallDto.isEmpty()) {
+            throw new ScryfallMissingImageException("Carta sem imagem não pode ser cadastrada no catalogo.");
+        }
+
+        if (cartaCatalogoConvertida.getOracleId() == null) {
+            cartaCatalogoConvertida.setOracleId(cardFaceScryfallDto.getFirst().oracleId());
+        }
+
+        CartaScryfallDTO.CardFaceScryfallDTO faceFrente = cardFaceScryfallDto.getFirst();
+        if (faceFrente.imageUris() != null) {
+            cartaCatalogoConvertida.setImagemFrenteUrl(faceFrente.imageUris().normal());
+        }
+
+        CartaScryfallDTO.CardFaceScryfallDTO faceVerso = cardFaceScryfallDto.getLast();
+        if (faceVerso != null) {
+            cartaCatalogoConvertida.setImagemVersoUrl(cardFaceScryfallDto.getLast().imageUris().normal());
+        }
     }
 }
