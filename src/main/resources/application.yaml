@@ -8,7 +8,6 @@ spring:
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
-
   jpa:
     database: POSTGRESQL
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -18,3 +17,6 @@ spring:
     properties:
       hibernate:
         format-sql: true
+        jdbc:
+          batch_size: 1000
+          order_inserts: true
