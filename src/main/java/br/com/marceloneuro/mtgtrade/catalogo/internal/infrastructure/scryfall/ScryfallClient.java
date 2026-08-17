@@ -24,11 +24,11 @@ class ScryfallClient {
 
         JsonNode raiz = objectMapper.readTree(respostaJson);
 
-        JsonNode data = raiz.get("data");
+        JsonNode data = raiz.path("data");
 
         for (JsonNode node : data) {
 
-            if (node.path("type").asString().equals("default_cards")) {
+            if ("default_cards".equals(node.path("type").asString())) {
                 return node.path("jsonl_download_uri").asString();
             }
         }
