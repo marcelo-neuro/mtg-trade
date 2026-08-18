@@ -6,12 +6,16 @@ import lombok.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "catalogo_cartas")
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "catalogo_cartas", indexes = {
+        //Essas colunas são as mais utilizadas em queries.
+        @Index(name = "idx_carta_nome", columnList = "nome"),
+        @Index(name = "idx_oracle_id", columnList = "oracle_id")
+})
 public class CartaCatalogo {
 
     @Id
