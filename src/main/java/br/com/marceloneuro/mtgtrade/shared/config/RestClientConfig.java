@@ -1,4 +1,4 @@
-package br.com.marceloneuro.mtgtrade.shared;
+package br.com.marceloneuro.mtgtrade.shared.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
