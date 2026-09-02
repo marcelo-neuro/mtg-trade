@@ -1,4 +1,4 @@
-package br.com.marceloneuro.mtgtrade.iam.internal.application.service;
+package br.com.marceloneuro.mtgtrade.iam.internal.infrastructure.security;
 
 import br.com.marceloneuro.mtgtrade.iam.internal.domain.Usuario;
 import lombok.RequiredArgsConstructor;
