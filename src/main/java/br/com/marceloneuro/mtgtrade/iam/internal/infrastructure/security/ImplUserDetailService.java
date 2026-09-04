@@ -1,7 +1,6 @@
-package br.com.marceloneuro.mtgtrade.iam.internal.application.service;
+package br.com.marceloneuro.mtgtrade.iam.internal.infrastructure.security;
 
 import br.com.marceloneuro.mtgtrade.iam.internal.infrastructure.UsuarioRepository;
-import br.com.marceloneuro.mtgtrade.iam.internal.infrastructure.security.ImplUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
