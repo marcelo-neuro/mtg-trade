@@ -20,3 +20,8 @@ spring:
         jdbc:
           batch_size: 1000
           order_inserts: true
+
+api:
+  security:
+    token:
+      secret: ${TOKEN_SECRET}
