@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -22,6 +23,16 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.NOT_FOUND;
 
         ErroDTO erro = new ErroDTO(e.getMessage(), request.getRequestURI(),
+                status.value(), Instant.now());
+
+        return ResponseEntity.status(status).body(erro);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErroDTO> handleBadCredentialsException(BadCredentialsException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+
+        ErroDTO erro = new ErroDTO("E-mail, ou senha incorretos", request.getRequestURI(),
                 status.value(), Instant.now());
 
         return ResponseEntity.status(status).body(erro);
