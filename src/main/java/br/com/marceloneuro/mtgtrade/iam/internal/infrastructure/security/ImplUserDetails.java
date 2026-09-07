@@ -1,6 +1,7 @@
 package br.com.marceloneuro.mtgtrade.iam.internal.infrastructure.security;
 
 import br.com.marceloneuro.mtgtrade.iam.internal.domain.Usuario;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ImplUserDetails implements UserDetails {
 
+    @Getter
     private final Usuario usuario;
 
     @Override
