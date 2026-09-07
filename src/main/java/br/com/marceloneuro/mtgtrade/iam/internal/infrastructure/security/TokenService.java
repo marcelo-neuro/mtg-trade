@@ -17,7 +17,7 @@ public class TokenService {
 
     public String gerarToken(ImplUserDetails userDetails) {
         Algorithm algoritmo = Algorithm.HMAC256(segredoToken);
-        Instant validadeToken = LocalDateTime.now().plusHours(1).toInstant(ZoneOffset.of("-03:00"));
+        Instant validadeToken = LocalDateTime.now().plusHours(1).toInstant(ZoneOffset.UTC);
 
         return JWT.create()
                 .withIssuer("mtg-trade")
