@@ -2,6 +2,7 @@ package br.com.marceloneuro.mtgtrade.iam.internal.web;
 
 import br.com.marceloneuro.mtgtrade.iam.internal.application.service.LoginService;
 import br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto.LoginRequestDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +18,7 @@ public class LoginController {
     private final LoginService loginService;
 
     @PostMapping
-    public ResponseEntity<String> login(@RequestBody LoginRequestDTO loginRequest) {
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
         String response = loginService.autenticar(loginRequest);
 
         return ResponseEntity.ok(response);

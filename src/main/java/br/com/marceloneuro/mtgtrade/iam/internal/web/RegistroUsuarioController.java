@@ -3,6 +3,7 @@ package br.com.marceloneuro.mtgtrade.iam.internal.web;
 import br.com.marceloneuro.mtgtrade.iam.internal.application.service.RegistroService;
 import br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto.RegistroUsuarioRequestDTO;
 import br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto.RegistroUsuarioResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +22,7 @@ public class RegistroUsuarioController {
     private final RegistroService registroService;
 
     @PostMapping
-    public ResponseEntity<RegistroUsuarioResponseDTO> registrarUsuario(@RequestBody RegistroUsuarioRequestDTO request) {
+    public ResponseEntity<RegistroUsuarioResponseDTO> registrarUsuario(@Valid @RequestBody RegistroUsuarioRequestDTO request) {
         RegistroUsuarioResponseDTO response = registroService.criarUsuario(request);
 
         URI location = ServletUriComponentsBuilder
