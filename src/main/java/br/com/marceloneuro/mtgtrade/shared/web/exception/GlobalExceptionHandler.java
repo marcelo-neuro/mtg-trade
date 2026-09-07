@@ -5,6 +5,7 @@ import br.com.marceloneuro.mtgtrade.shared.web.exception.dto.MensagemCampo;
 import br.com.marceloneuro.mtgtrade.shared.web.exception.dto.ValidationErroDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -21,6 +22,16 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.NOT_FOUND;
 
         ErroDTO erro = new ErroDTO(e.getMessage(), request.getRequestURI(),
+                status.value(), Instant.now());
+
+        return ResponseEntity.status(status).body(erro);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErroDTO> handleDataIntegrityViolationException(DataIntegrityViolationException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        ErroDTO erro = new ErroDTO("E-mail já registrado", request.getRequestURI(),
                 status.value(), Instant.now());
 
         return ResponseEntity.status(status).body(erro);
