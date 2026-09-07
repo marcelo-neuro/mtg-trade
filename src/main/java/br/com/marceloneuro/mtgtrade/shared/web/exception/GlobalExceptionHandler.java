@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ValidationErroDTO> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.UNPROCESSABLE_CONTENT;
 
-        ValidationErroDTO erros = new ValidationErroDTO(e.getMessage(), request.getRequestURI(),
+        ValidationErroDTO erros = new ValidationErroDTO("Erro de validação nos dados enviados.", request.getRequestURI(),
                 status.value(), Instant.now());
 
         e.getBindingResult()
