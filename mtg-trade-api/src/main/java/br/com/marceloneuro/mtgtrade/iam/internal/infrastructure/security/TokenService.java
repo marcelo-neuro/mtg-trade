@@ -15,12 +15,15 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String segredoToken;
 
+    @Value("${api.security.token.issuer}")
+    private String issuer;
+
     public String gerarToken(ImplUserDetails userDetails) {
         Algorithm algoritmo = Algorithm.HMAC256(segredoToken);
         Instant validadeToken = LocalDateTime.now().plusHours(1).toInstant(ZoneOffset.UTC);
 
         return JWT.create()
-                .withIssuer("mtg-trade")
+                .withIssuer(issuer)
                 .withSubject(userDetails.getUsuario().getId().toString())
                 .withExpiresAt(validadeToken)
                 .sign(algoritmo);

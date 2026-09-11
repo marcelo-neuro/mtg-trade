@@ -1,3 +1,6 @@
+server:
+  port: ${PORT_MTG_TRADE_API}
+
 spring:
   config:
     import: "optional:file:.env[.properties]"
@@ -25,3 +28,4 @@ api:
   security:
     token:
       secret: ${TOKEN_SECRET}
+      issuer: mtg-trade

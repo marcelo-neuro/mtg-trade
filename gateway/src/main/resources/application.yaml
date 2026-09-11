@@ -6,3 +6,9 @@ spring:
     import: "optional:file:.env[.properties]"
   application:
     name: gateway
+
+api:
+  security:
+    token:
+      secret: ${TOKEN_SECRET}
+      issuer: mtg-trade
