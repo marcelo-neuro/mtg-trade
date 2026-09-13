@@ -6,6 +6,16 @@ spring:
     import: "optional:file:.env[.properties]"
   application:
     name: gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: my-service
+              uri: http://google.com
+              predicates:
+                - Path=/**
+
 
 api:
   security:
