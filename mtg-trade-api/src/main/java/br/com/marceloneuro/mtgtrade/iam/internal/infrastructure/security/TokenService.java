@@ -6,8 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 
 @Service
 public class TokenService {
@@ -20,7 +19,7 @@ public class TokenService {
 
     public String gerarToken(ImplUserDetails userDetails) {
         Algorithm algoritmo = Algorithm.HMAC256(segredoToken);
-        Instant validadeToken = LocalDateTime.now().plusHours(1).toInstant(ZoneOffset.UTC);
+        Instant validadeToken = Instant.now().plus(1, ChronoUnit.HOURS);
 
         return JWT.create()
                 .withIssuer(issuer)
