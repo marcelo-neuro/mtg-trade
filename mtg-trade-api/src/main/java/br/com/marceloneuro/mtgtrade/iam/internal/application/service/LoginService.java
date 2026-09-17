@@ -1,6 +1,7 @@
 package br.com.marceloneuro.mtgtrade.iam.internal.application.service;
 
 import br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto.LoginRequestDTO;
+import br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto.TokenDTO;
 import br.com.marceloneuro.mtgtrade.iam.internal.infrastructure.security.ImplUserDetails;
 import br.com.marceloneuro.mtgtrade.iam.internal.infrastructure.security.TokenService;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +17,12 @@ public class LoginService {
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
 
-    public String autenticar(LoginRequestDTO loginRequest) {
+    public TokenDTO autenticar(LoginRequestDTO loginRequest) {
         var authToken = new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.senha());
         Authentication autenticacao = authenticationManager.authenticate(authToken);
 
         ImplUserDetails usuario = (ImplUserDetails) autenticacao.getPrincipal();
 
-        return tokenService.gerarToken(usuario);
+        return new TokenDTO(tokenService.gerarToken(usuario));
     }
 }
