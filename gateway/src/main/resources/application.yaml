@@ -1,0 +1,35 @@
+server:
+  port: ${GATEWAY_PORT}
+
+spring:
+  config:
+    import: "optional:file:.env[.properties]"
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            # ROTAS PÚBLICAS (Autenticação)
+            - id: monolito-autenticacao
+              uri: http://localhost:8080
+              order: 0
+              predicates:
+                  - Path=/api/v1/login, /api/v1/registro
+
+            # ROTAS SEGURAS (Autenticação necessária)
+            - id: monolito-service
+              uri: http://localhost:8080
+              order: 1
+              predicates:
+                - Path=/**
+              filters:
+                - JwtAuthentication
+
+
+api:
+  security:
+    token:
+      secret: ${TOKEN_SECRET}
+      issuer: mtg-trade
