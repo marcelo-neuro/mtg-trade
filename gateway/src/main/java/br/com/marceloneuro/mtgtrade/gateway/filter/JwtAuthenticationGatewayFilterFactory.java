@@ -3,7 +3,6 @@ package br.com.marceloneuro.mtgtrade.gateway.filter;
 import br.com.marceloneuro.mtgtrade.gateway.security.TokenValidator;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
-import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
