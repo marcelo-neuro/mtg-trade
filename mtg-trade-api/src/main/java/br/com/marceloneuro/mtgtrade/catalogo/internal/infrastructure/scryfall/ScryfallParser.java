@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,10 @@ class ScryfallParser {
         cartaCatalogoConvertida.setPrintId(cartaScryfallDto.id());
         cartaCatalogoConvertida.setNome(cartaScryfallDto.name());
         cartaCatalogoConvertida.setEdicao(cartaScryfallDto.setName());
+        cartaCatalogoConvertida.setIsPromo(cartaScryfallDto.promo());
+
+        cartaCatalogoConvertida.setAcabamentos(converteOpcoesDetalhamentoParaString(cartaScryfallDto.finishes()));
+        cartaCatalogoConvertida.setTiposPromo(converteOpcoesDetalhamentoParaString(cartaScryfallDto.promoTypes()));
 
         // Carta de dupla face
         if (cartaScryfallDto.imageUris() == null) {
@@ -61,5 +66,19 @@ class ScryfallParser {
         if (faceVerso != null) {
             cartaCatalogoConvertida.setImagemVersoUrl(cardFaceScryfallDto.getLast().imageUris().normal());
         }
+    }
+
+    private String converteOpcoesDetalhamentoParaString(List<String> opcoes) {
+        if (opcoes == null) {
+            return null;
+        }
+
+        StringJoiner joiner = new StringJoiner(",");
+
+        for (String opcao : opcoes) {
+            joiner.add(opcao);
+        }
+
+        return joiner.toString();
     }
 }
