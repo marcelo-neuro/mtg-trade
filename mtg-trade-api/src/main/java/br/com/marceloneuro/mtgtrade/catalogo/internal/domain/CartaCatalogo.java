@@ -16,6 +16,10 @@ import java.util.UUID;
         @Index(name = "idx_carta_nome", columnList = "nome"),
         @Index(name = "idx_oracle_id", columnList = "oracle_id")
 })
+// Essa entidade representa uma carta que existe no nosso catalogo de cartas
+// disponíveis para os usuários adicionarem ao inventário.
+// Essa entidade é desnormalizada, a fim de prover uma busca rápida pelas cartas,
+// além de permitir um fetch veloz para atualizar o bulk.
 public class CartaCatalogo {
 
     @Id
@@ -39,4 +43,9 @@ public class CartaCatalogo {
 
     @Column(name = "imagem_verso_url")
     private String imagemVersoUrl;
+
+    // O acabamento representa um efeito especial que pode contar em algumas cartas, normalemte de colecionador
+    // Uma carta pode conter várias opções de acabamentos, esse campo irá armazenar as opções.
+    @Column(name = "acabamentos", length = 100)
+    private String acabamentos;
 }
