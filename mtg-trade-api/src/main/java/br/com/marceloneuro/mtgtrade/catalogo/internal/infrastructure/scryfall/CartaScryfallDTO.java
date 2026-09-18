@@ -19,11 +19,18 @@ record CartaScryfallDTO(
         String imageStatus,
         @JsonProperty("layout")
         String layout,
+        @JsonProperty("promo")
+        Boolean promo,
 
         @JsonProperty("image_uris")
         ImageUrisScryfallDTO imageUris,
         @JsonProperty("card_faces")
-        List<CardFaceScryfallDTO> cardFaces
+        List<CardFaceScryfallDTO> cardFaces,
+        @JsonProperty("finishes")
+        List<String> finishes,
+        @JsonProperty("promo_types")
+        List<String> promoTypes
+
 ) {
 
         @JsonIgnoreProperties(ignoreUnknown = true)
