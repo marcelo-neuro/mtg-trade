@@ -29,10 +29,10 @@ public class ItemInventario {
     private UUID id;
 
     @Column(name = "usuario_id" , nullable = false)
-    private UUID idUsuario;
+    private UUID usuarioId;
 
     @Column(name = "carta_catalogo_id", nullable = false)
-    private UUID cartaCatalogoID;
+    private UUID cartaCatalogoId;
 
     @Column(name = "acabamento", nullable = false, length = 50)
     private String acabamento;
