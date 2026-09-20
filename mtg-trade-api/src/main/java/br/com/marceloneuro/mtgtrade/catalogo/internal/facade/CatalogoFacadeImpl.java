@@ -17,6 +17,7 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
     public CartaCatalogoDTO obterPorPrintId(String printId) {
         return catalogoRepository.findByPrintId(printId)
                 .map(cartaCatalogo -> new CartaCatalogoDTO(
+                        cartaCatalogo.getId().toString(),
                         cartaCatalogo.getOracleId(),
                         cartaCatalogo.getPrintId(),
                         cartaCatalogo.getNome(),
