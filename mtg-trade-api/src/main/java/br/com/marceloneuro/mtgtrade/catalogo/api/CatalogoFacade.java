@@ -4,4 +4,5 @@ import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
 
 public interface CatalogoFacade {
     CartaCatalogoDTO obterPorPrintId(String printId);
+    CartaCatalogoDTO obterPorId(String id);
 }
