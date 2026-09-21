@@ -9,10 +9,12 @@ import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Estado;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Idioma;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.ItemInventario;
 import br.com.marceloneuro.mtgtrade.inventario.internal.infrastructure.ItemInventarioRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -24,6 +26,9 @@ public class ItemInventarioService {
     private final CatalogoFacade catalogoFacade;
     private final ItemInventarioRepository itemInventarioRepository;
 
+    // Esse trecho é responsável por adicionar um item ao inventário de um usuário,
+    // caso o item já exista ele deve somar a quantidade ao item já criado na tabela.
+    @Transactional
     public ItemInventarioResponseDTO adicionarItem(String usuarioId, AdicionarItemRequestDTO request) {
         ItemInventario itemInventarioAdicionado = null;
 
@@ -68,9 +73,53 @@ public class ItemInventarioService {
         return null;
     }
 
+    // Esse trecho é responsável por modificar um item, na prática, isso pode gerar alguns problemas,
+    // uma vez que o usuário pode modificar o item e ele pode colidir com a constraint unique, para evitar isso orquestraremos um update e delete
+    // se o estado final do registro modificado causar colisão nós fazemos a adição no item já existente.
+    @Transactional
     public ItemInventarioResponseDTO atualizarItem(String usuarioId, String itemId, AtualizarItemRequestDTO request) {
-        // TODO: Validar pertencimento ao usuário e atualizar quantidade/estado
-        return null;
+        UUID uuidItem = UUID.fromString(itemId);
+        UUID uuidUsuario = UUID.fromString(usuarioId);
+        ItemInventario itemOriginal = itemInventarioRepository.findByIdAndUsuarioId(uuidItem, uuidUsuario)
+                .orElseThrow(() -> new EntityNotFoundException("Item não existente no inventário desse usuário."));
+
+        Estado estadoItem = Estado.valueOf(request.estado().trim().toUpperCase());
+        Idioma idiomaItem = Idioma.valueOf(request.idioma().trim().toUpperCase());
+
+
+        // Busca para saber se já existe um registro físico desse item.
+        Optional<ItemInventario> destinoOpt = itemInventarioRepository
+                .findByUsuarioIdAndCartaCatalogoIdAndAcabamentoAndPromoAndEstadoAndIdioma(uuidUsuario, itemOriginal.getCartaCatalogoId(),
+                        request.acabamento(), request.promo(), estadoItem, idiomaItem);
+
+        CartaCatalogoDTO cartaCatalogo = catalogoFacade.obterPorId(itemOriginal.getCartaCatalogoId().toString());
+
+        ItemInventario itemSalvo;
+        // Caso o item exista nós verificamos se eles não são o mesmo registro (ID)
+        // Se não forem apagamos o original e adicionamos a quantidade ao novo registro.
+        if (destinoOpt.isPresent()) {
+            ItemInventario destino = destinoOpt.get();
+
+            if (destino.equals(itemOriginal)) {
+                itemSalvo = itemOriginal;
+                itemSalvo.setQuantidade(request.quantidade());
+            } else {
+                itemInventarioRepository.delete(itemOriginal);
+                destino.setQuantidade(destino.getQuantidade() + request.quantidade());
+                itemSalvo = destino;
+            }
+        } else {
+            // Caso o item não crie duplicata, apenas seguimos com o CRUD padrão
+            itemSalvo = itemOriginal;
+            itemSalvo.setAcabamento(request.acabamento());
+            itemSalvo.setPromo(request.promo());
+            itemSalvo.setQuantidade(request.quantidade());
+            itemSalvo.setEstado(estadoItem);
+            itemSalvo.setIdioma(idiomaItem);
+        }
+
+         itemSalvo = itemInventarioRepository.save(itemSalvo);
+        return new ItemInventarioResponseDTO(itemSalvo, cartaCatalogo);
     }
 
     public void removerItem(String usuarioId, String itemId) {
