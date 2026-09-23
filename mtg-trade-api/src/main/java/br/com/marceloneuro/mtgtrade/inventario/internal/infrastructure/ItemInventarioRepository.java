@@ -14,5 +14,5 @@ public interface ItemInventarioRepository extends JpaRepository<ItemInventario, 
                                                                                       String acabamento, String promo,
                                                                                       Estado estado, Idioma idioma);
 
-    Optional<ItemInventario> findByIdAndUsuarioId(UUID id, UUID usuarioIs);
+    Optional<ItemInventario> findByIdAndUsuarioId(UUID id, UUID usuarioIsd);
 }
