@@ -5,6 +5,7 @@ import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Idioma;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.ItemInventario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,5 +15,7 @@ public interface ItemInventarioRepository extends JpaRepository<ItemInventario, 
                                                                                       String acabamento, String promo,
                                                                                       Estado estado, Idioma idioma);
 
-    Optional<ItemInventario> findByIdAndUsuarioId(UUID id, UUID usuarioIsd);
+    Optional<ItemInventario> findByIdAndUsuarioId(UUID id, UUID usuarioId);
+
+    List<ItemInventario> findByUsuarioId(UUID usuarioId);
 }
