@@ -7,6 +7,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -43,5 +44,19 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
                         cartaCatalogo.getImagemVersoUrl()
                 ))
                 .orElseThrow(() -> new EntityNotFoundException("Id não existente: " + id));
+    }
+
+    @Override
+    public List<CartaCatalogoDTO> buscaPorConjuntoIds(Iterable<UUID> conjuntoIds) {
+        return catalogoRepository.findAllById(conjuntoIds)
+                .stream().map(cartaCatalogo -> new CartaCatalogoDTO(
+                        cartaCatalogo.getId().toString(),
+                        cartaCatalogo.getOracleId(),
+                        cartaCatalogo.getPrintId(),
+                        cartaCatalogo.getNome(),
+                        cartaCatalogo.getEdicao(),
+                        cartaCatalogo.getImagemFrenteUrl(),
+                        cartaCatalogo.getImagemVersoUrl()))
+                .toList();
     }
 }
