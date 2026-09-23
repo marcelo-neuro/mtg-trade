@@ -59,10 +59,12 @@ public class ItemInventarioService {
         }
 
         ItemInventario itemSalvo = itemInventarioRepository.save(itemInventarioAdicionado);
-        CartaCatalogoDTO cartaCatalogo = catalogoFacade.obterPorId(request.cartaCatalogoId());
+        CartaCatalogoDTO cartaCatalogo = catalogoFacade.obterPorId(uuidCartaCatalogo);
         return new ItemInventarioResponseDTO(itemSalvo, cartaCatalogo);
     }
 
+    // Como estamos retornando ItemInventarioResponseDTO, que pede por um detalhamento da carta esse tipo de consulta gera um problema de N+1
+    // Para contornarmos isso iremos buscar todas as cartas do catalogo de uma vez, assim evitando idas desnecessárias ao banco de dados.
     public Page<ItemInventarioResponseDTO> listarItensUsuario(String usuarioId, Pageable pageable) {
         // TODO: Retornar lista paginada de itens pertencentes ao usuarioId
         return Page.empty();
@@ -73,7 +75,7 @@ public class ItemInventarioService {
         ItemInventario itemInventario = itemInventarioRepository.findByIdAndUsuarioId(UUID.fromString(itemId), UUID.fromString(usuarioId))
                 .orElseThrow(() -> new EntityNotFoundException("Item não existente no inventário do usuário."));
 
-        CartaCatalogoDTO detalhesCarta = catalogoFacade.obterPorId(itemInventario.getCartaCatalogoId().toString());
+        CartaCatalogoDTO detalhesCarta = catalogoFacade.obterPorId(itemInventario.getCartaCatalogoId());
 
 
         return new ItemInventarioResponseDTO(itemInventario, detalhesCarta);
@@ -98,7 +100,7 @@ public class ItemInventarioService {
                 .findByUsuarioIdAndCartaCatalogoIdAndAcabamentoAndPromoAndEstadoAndIdioma(uuidUsuario, itemOriginal.getCartaCatalogoId(),
                         request.acabamento(), request.promo(), estadoItem, idiomaItem);
 
-        CartaCatalogoDTO cartaCatalogo = catalogoFacade.obterPorId(itemOriginal.getCartaCatalogoId().toString());
+        CartaCatalogoDTO cartaCatalogo = catalogoFacade.obterPorId(itemOriginal.getCartaCatalogoId());
 
         ItemInventario itemSalvo;
         // Caso o item exista nós verificamos se eles não são o mesmo registro (ID)

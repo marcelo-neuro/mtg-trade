@@ -31,8 +31,8 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
     }
 
     @Override
-    public CartaCatalogoDTO obterPorId(String id) {
-        return catalogoRepository.findById(UUID.fromString(id))
+    public CartaCatalogoDTO obterPorId(UUID id) {
+        return catalogoRepository.findById(id)
                 .map(cartaCatalogo -> new CartaCatalogoDTO(
                         cartaCatalogo.getId().toString(),
                         cartaCatalogo.getOracleId(),
