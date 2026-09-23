@@ -65,6 +65,7 @@ public class ItemInventarioService {
 
     // Como estamos retornando ItemInventarioResponseDTO, que pede por um detalhamento da carta esse tipo de consulta gera um problema de N+1
     // Para contornarmos isso iremos buscar todas as cartas do catálogo de uma vez, assim evitando idas desnecessárias ao banco de dados.
+    @Transactional(readOnly = true)
     public Page<ItemInventarioResponseDTO> listarItensUsuario(String usuarioId, Pageable pageable) {
         Page<ItemInventario> itens = itemInventarioRepository.findByUsuarioId(UUID.fromString(usuarioId), pageable);
 
