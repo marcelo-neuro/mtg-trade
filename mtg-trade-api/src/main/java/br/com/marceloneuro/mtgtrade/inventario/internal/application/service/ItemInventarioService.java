@@ -68,9 +68,15 @@ public class ItemInventarioService {
         return Page.empty();
     }
 
+    @Transactional(readOnly = true)
     public ItemInventarioResponseDTO buscarItemPorId(String usuarioId, String itemId) {
-        // TODO: Buscar item, garantir que pertence ao usuarioId e mapear para DTO
-        return null;
+        ItemInventario itemInventario = itemInventarioRepository.findByIdAndUsuarioId(UUID.fromString(itemId), UUID.fromString(usuarioId))
+                .orElseThrow(() -> new EntityNotFoundException("Item não existente no inventário do usuário."));
+
+        CartaCatalogoDTO detalhesCarta = catalogoFacade.obterPorId(itemInventario.getCartaCatalogoId().toString());
+
+
+        return new ItemInventarioResponseDTO(itemInventario, detalhesCarta);
     }
 
     // Esse trecho é responsável por modificar um item, na prática, isso pode gerar alguns problemas,
@@ -122,7 +128,11 @@ public class ItemInventarioService {
         return new ItemInventarioResponseDTO(itemSalvo, cartaCatalogo);
     }
 
+    @Transactional
     public void removerItem(String usuarioId, String itemId) {
-        // TODO: Validar pertencimento ao usuário e deletar o registro
+        ItemInventario itemInventario = itemInventarioRepository.findByIdAndUsuarioId(UUID.fromString(itemId), UUID.fromString(usuarioId))
+                .orElseThrow(() -> new EntityNotFoundException("Item não existente no inventário do usuário."));
+
+        itemInventarioRepository.delete(itemInventario);
     }
 }
