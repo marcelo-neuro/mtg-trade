@@ -16,8 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,10 +64,22 @@ public class ItemInventarioService {
     }
 
     // Como estamos retornando ItemInventarioResponseDTO, que pede por um detalhamento da carta esse tipo de consulta gera um problema de N+1
-    // Para contornarmos isso iremos buscar todas as cartas do catalogo de uma vez, assim evitando idas desnecessárias ao banco de dados.
+    // Para contornarmos isso iremos buscar todas as cartas do catálogo de uma vez, assim evitando idas desnecessárias ao banco de dados.
     public Page<ItemInventarioResponseDTO> listarItensUsuario(String usuarioId, Pageable pageable) {
-        // TODO: Retornar lista paginada de itens pertencentes ao usuarioId
-        return Page.empty();
+        Page<ItemInventario> itens = itemInventarioRepository.findByUsuarioId(UUID.fromString(usuarioId), pageable);
+
+        // Utiliza um set para garantir que a busca não retorne duplicatas desnecessárias.
+        Set<UUID> uuidsDetalhesCartas = itens
+                .stream().map(ItemInventario::getCartaCatalogoId)
+                .collect(Collectors.toSet());
+
+        Map<String, CartaCatalogoDTO> mapDetalhesCartas = catalogoFacade.buscaPorConjuntoIds(uuidsDetalhesCartas)
+                .stream().collect(Collectors.toMap(// Chave / Valor
+                   CartaCatalogoDTO::id, detalhesCarta -> detalhesCarta
+                ));
+
+        return itens
+                .map(item -> new ItemInventarioResponseDTO(item, mapDetalhesCartas.get(item.getCartaCatalogoId().toString())));
     }
 
     @Transactional(readOnly = true)
