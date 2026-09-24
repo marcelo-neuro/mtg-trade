@@ -8,6 +8,7 @@ public record CartaCatalogoDTO(
         String edicao,
         String acabamentos,
         String tiposPromo,
+        Boolean isPromo,
         String imagemFrenteUrl,
         String imagemVersoUrl
 ) {
