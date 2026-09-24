@@ -20,5 +20,5 @@ public record AtualizarItemRequestDTO(
 
         @NotBlank(message = "O idioma da carta é obrigatório.")
         String idioma
-) {
+) implements AtributosFisicosRequest {
 }
