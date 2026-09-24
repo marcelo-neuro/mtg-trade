@@ -2,7 +2,9 @@ package br.com.marceloneuro.mtgtrade.inventario.internal.application.service.val
 
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.AtributosFisicosRequest;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ValidadorTipoPromo implements ValidadorItemInventario{
     @Override
     public void validar(AtributosFisicosRequest request, CartaCatalogoDTO cartaCatalogo) {
