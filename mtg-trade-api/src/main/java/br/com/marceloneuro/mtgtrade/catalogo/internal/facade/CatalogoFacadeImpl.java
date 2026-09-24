@@ -7,6 +7,9 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.UUID;
+
 @Component
 @RequiredArgsConstructor
 public class CatalogoFacadeImpl implements CatalogoFacade {
@@ -17,6 +20,7 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
     public CartaCatalogoDTO obterPorPrintId(String printId) {
         return catalogoRepository.findByPrintId(printId)
                 .map(cartaCatalogo -> new CartaCatalogoDTO(
+                        cartaCatalogo.getId().toString(),
                         cartaCatalogo.getOracleId(),
                         cartaCatalogo.getPrintId(),
                         cartaCatalogo.getNome(),
@@ -25,5 +29,34 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
                         cartaCatalogo.getImagemVersoUrl()
                 ))
                 .orElseThrow(() -> new EntityNotFoundException("Print Id não existe. Print Id: " + printId));
+    }
+
+    @Override
+    public CartaCatalogoDTO obterPorId(UUID id) {
+        return catalogoRepository.findById(id)
+                .map(cartaCatalogo -> new CartaCatalogoDTO(
+                        cartaCatalogo.getId().toString(),
+                        cartaCatalogo.getOracleId(),
+                        cartaCatalogo.getPrintId(),
+                        cartaCatalogo.getNome(),
+                        cartaCatalogo.getEdicao(),
+                        cartaCatalogo.getImagemFrenteUrl(),
+                        cartaCatalogo.getImagemVersoUrl()
+                ))
+                .orElseThrow(() -> new EntityNotFoundException("Id não existente: " + id));
+    }
+
+    @Override
+    public List<CartaCatalogoDTO> buscaPorConjuntoIds(Iterable<UUID> conjuntoIds) {
+        return catalogoRepository.findAllById(conjuntoIds)
+                .stream().map(cartaCatalogo -> new CartaCatalogoDTO(
+                        cartaCatalogo.getId().toString(),
+                        cartaCatalogo.getOracleId(),
+                        cartaCatalogo.getPrintId(),
+                        cartaCatalogo.getNome(),
+                        cartaCatalogo.getEdicao(),
+                        cartaCatalogo.getImagemFrenteUrl(),
+                        cartaCatalogo.getImagemVersoUrl()))
+                .toList();
     }
 }

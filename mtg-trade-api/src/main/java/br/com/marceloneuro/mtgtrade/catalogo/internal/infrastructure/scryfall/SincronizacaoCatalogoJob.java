@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 @Service
@@ -25,6 +26,8 @@ public class SincronizacaoCatalogoJob {
     // Coordena o fluxo de ETL das cartas do Scryfall
     public void sincronizaCatalogo() {
         String urlBulk = scryfallClient.obtemUrlBulkDataRecente();
+        Set<String> todosPrintsIds = catalogoRepository.findAllPrintsIds();
+
         try {
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(
@@ -37,7 +40,14 @@ public class SincronizacaoCatalogoJob {
                 String linha;
                 while ((linha = reader.readLine()) != null) {
                     try {
-                        lista1000CartasCatalogo.add(scryfallParser.converteLinhaJsonEmCartaCatalogo(linha));
+                        CartaCatalogo cartaConvertida = scryfallParser.converteLinhaJsonEmCartaCatalogo(linha);
+
+                        // Resolve o problema de Delta Load verificando se a carta já está registrada no catálogo.
+                        if (todosPrintsIds.contains(cartaConvertida.getPrintId())) {
+                            continue;
+                        }
+
+                        lista1000CartasCatalogo.add(cartaConvertida);
 
                         if (lista1000CartasCatalogo.size() == 1000) {
                             catalogoRepository.saveAll(lista1000CartasCatalogo);
