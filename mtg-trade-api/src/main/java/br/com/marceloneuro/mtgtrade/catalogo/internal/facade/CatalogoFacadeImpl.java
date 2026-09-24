@@ -25,6 +25,8 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
                         cartaCatalogo.getPrintId(),
                         cartaCatalogo.getNome(),
                         cartaCatalogo.getEdicao(),
+                        cartaCatalogo.getAcabamentos(),
+                        cartaCatalogo.getTiposPromo(),
                         cartaCatalogo.getImagemFrenteUrl(),
                         cartaCatalogo.getImagemVersoUrl()
                 ))
@@ -40,6 +42,8 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
                         cartaCatalogo.getPrintId(),
                         cartaCatalogo.getNome(),
                         cartaCatalogo.getEdicao(),
+                        cartaCatalogo.getAcabamentos(),
+                        cartaCatalogo.getTiposPromo(),
                         cartaCatalogo.getImagemFrenteUrl(),
                         cartaCatalogo.getImagemVersoUrl()
                 ))
@@ -55,6 +59,8 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
                         cartaCatalogo.getPrintId(),
                         cartaCatalogo.getNome(),
                         cartaCatalogo.getEdicao(),
+                        cartaCatalogo.getAcabamentos(),
+                        cartaCatalogo.getTiposPromo(),
                         cartaCatalogo.getImagemFrenteUrl(),
                         cartaCatalogo.getImagemVersoUrl()))
                 .toList();
