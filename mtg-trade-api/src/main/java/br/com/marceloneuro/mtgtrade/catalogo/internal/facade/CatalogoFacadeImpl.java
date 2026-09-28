@@ -2,6 +2,7 @@ package br.com.marceloneuro.mtgtrade.catalogo.internal.facade;
 
 import br.com.marceloneuro.mtgtrade.catalogo.api.CatalogoFacade;
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
+import br.com.marceloneuro.mtgtrade.catalogo.internal.domain.exception.CartaCatalogoNaoEncontradaException;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.CatalogoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
                         cartaCatalogo.getImagemFrenteUrl(),
                         cartaCatalogo.getImagemVersoUrl()
                 ))
-                .orElseThrow(() -> new EntityNotFoundException("Print Id não existe. Print Id: " + printId));
+                .orElseThrow(() -> new CartaCatalogoNaoEncontradaException("Carta não contrada por Print Id."));
     }
 
     @Override
@@ -49,7 +50,7 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
                         cartaCatalogo.getImagemFrenteUrl(),
                         cartaCatalogo.getImagemVersoUrl()
                 ))
-                .orElseThrow(() -> new EntityNotFoundException("Id não existente: " + id));
+                .orElseThrow(() -> new CartaCatalogoNaoEncontradaException("Carta não encontrada pelo Id."));
     }
 
     @Override
