@@ -1,4 +1,4 @@
-package br.com.marceloneuro.mtgtrade.shared.web.exception.kernel;
+package br.com.marceloneuro.mtgtrade.shared.exception;
 
 public abstract class ExcecaoDominio extends RuntimeException {
 
