@@ -1,9 +1,9 @@
 package br.com.marceloneuro.mtgtrade.inventario.internal.domain.exception;
 
-import br.com.marceloneuro.mtgtrade.shared.exception.ExcecaoDominio;
+import br.com.marceloneuro.mtgtrade.shared.exception.DominioException;
 import br.com.marceloneuro.mtgtrade.shared.exception.TipoErroDominio;
 
-public class ItemNaoEncontradoException extends ExcecaoDominio {
+public class ItemNaoEncontradoException extends DominioException {
     public ItemNaoEncontradoException(String message) {
         super(
                 message,
