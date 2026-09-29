@@ -7,9 +7,9 @@ public class CartaCatalogoNaoEncontradaException extends ExcecaoDominio {
 
     public CartaCatalogoNaoEncontradaException(String mensagem) {
         super(
-                "CC-001",
-                "Carta do Catálogo Não Encontrada.",
                 mensagem,
+                "Carta do Catálogo Não Encontrada.",
+                "CC-001",
                 TipoErroDominio.RECURSO_NAO_ENCONTRADO
         );
     }
