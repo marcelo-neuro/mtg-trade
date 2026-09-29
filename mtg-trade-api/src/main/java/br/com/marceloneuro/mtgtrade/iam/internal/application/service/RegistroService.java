@@ -34,7 +34,8 @@ public class RegistroService {
 
         // A validação é feita novamente para em caso de concorrência ambos os usuários tenham passado pela verificação anterior.
         try {
-            Usuario usuarioCriado = usuarioRepository.save(novoUsuario);
+            // Utiliza saveAndFlush para garantir que o banco faça o INSERT dentro do try catch.
+            Usuario usuarioCriado = usuarioRepository.saveAndFlush(novoUsuario);
             return new RegistroUsuarioResponseDTO(usuarioCriado.getNomeUsuario(), usuarioCriado.getEmail());
         } catch (DataIntegrityViolationException e) {
             throw new UniqueNomeUsuarioEmailException("Nome de usuário ou e-mail já cadastrados.");
