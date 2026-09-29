@@ -30,10 +30,11 @@ public class RegistroService {
         novoUsuario.setEmail(request.email());
         novoUsuario.setSenha(passwordEncoder.encode(request.senha()));
 
-        Usuario usuarioCriado = usuarioRepository.save(novoUsuario);
+
 
         // A validação é feita novamente para em caso de concorrência ambos os usuários tenham passado pela verificação anterior.
         try {
+            Usuario usuarioCriado = usuarioRepository.save(novoUsuario);
             return new RegistroUsuarioResponseDTO(usuarioCriado.getNomeUsuario(), usuarioCriado.getEmail());
         } catch (DataIntegrityViolationException e) {
             throw new UniqueNomeUsuarioEmailException("Nome de usuário ou e-mail já cadastrados.");
