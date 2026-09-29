@@ -9,6 +9,7 @@ import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.vali
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Estado;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Idioma;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.ItemInventario;
+import br.com.marceloneuro.mtgtrade.inventario.internal.domain.exception.ItemNaoEncontradoException;
 import br.com.marceloneuro.mtgtrade.inventario.internal.infrastructure.ItemInventarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -92,7 +93,7 @@ public class ItemInventarioService {
     @Transactional(readOnly = true)
     public ItemInventarioResponseDTO buscarItemPorId(String usuarioId, String itemId) {
         ItemInventario itemInventario = itemInventarioRepository.findByIdAndUsuarioId(UUID.fromString(itemId), UUID.fromString(usuarioId))
-                .orElseThrow(() -> new EntityNotFoundException("Item não existente no inventário do usuário."));
+                .orElseThrow(() -> new ItemNaoEncontradoException("Item não existente no inventário do usuário."));
 
         CartaCatalogoDTO detalhesCarta = catalogoFacade.obterPorId(itemInventario.getCartaCatalogoId());
 
@@ -109,7 +110,7 @@ public class ItemInventarioService {
         UUID uuidUsuario = UUID.fromString(usuarioId);
 
         ItemInventario itemOriginal = itemInventarioRepository.findByIdAndUsuarioId(uuidItem, uuidUsuario)
-                .orElseThrow(() -> new EntityNotFoundException("Item não existente no inventário desse usuário."));
+                .orElseThrow(() -> new ItemNaoEncontradoException("Item não existente no inventário desse usuário."));
 
         CartaCatalogoDTO cartaCatalogo = catalogoFacade.obterPorId(itemOriginal.getCartaCatalogoId());
 
@@ -155,7 +156,7 @@ public class ItemInventarioService {
     @Transactional
     public void removerItem(String usuarioId, String itemId) {
         ItemInventario itemInventario = itemInventarioRepository.findByIdAndUsuarioId(UUID.fromString(itemId), UUID.fromString(usuarioId))
-                .orElseThrow(() -> new EntityNotFoundException("Item não existente no inventário do usuário."));
+                .orElseThrow(() -> new ItemNaoEncontradoException("Item não existente no inventário do usuário."));
 
         itemInventarioRepository.delete(itemInventario);
     }
