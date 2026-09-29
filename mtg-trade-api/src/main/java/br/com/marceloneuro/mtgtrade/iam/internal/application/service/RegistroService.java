@@ -22,7 +22,7 @@ public class RegistroService {
     public RegistroUsuarioResponseDTO criarUsuario(RegistroUsuarioRequestDTO request) {
         Usuario novoUsuario = new Usuario();
 
-        if (usuarioRepository.existisByEmailOrNomeUsuario(request.email(), request.nomeUsuario())) {
+        if (usuarioRepository.existsByEmailOrNomeUsuario(request.email(), request.nomeUsuario())) {
             throw new UniqueNomeUsuarioEmailException("Nome de usuário ou e-mail já cadastrados.");
         }
 
@@ -32,6 +32,7 @@ public class RegistroService {
 
         Usuario usuarioCriado = usuarioRepository.save(novoUsuario);
 
+        // A validação é feita novamente para em caso de concorrência ambos os usuários tenham passado pela verificação anterior.
         try {
             return new RegistroUsuarioResponseDTO(usuarioCriado.getNomeUsuario(), usuarioCriado.getEmail());
         } catch (DataIntegrityViolationException e) {
