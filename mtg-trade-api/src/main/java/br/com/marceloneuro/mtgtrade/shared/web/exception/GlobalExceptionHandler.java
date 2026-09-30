@@ -1,5 +1,6 @@
 package br.com.marceloneuro.mtgtrade.shared.web.exception;
 
+import br.com.marceloneuro.mtgtrade.shared.exception.DominioException;
 import br.com.marceloneuro.mtgtrade.shared.exception.TipoErroDominio;
 import br.com.marceloneuro.mtgtrade.shared.web.exception.dto.ErroDTO;
 import br.com.marceloneuro.mtgtrade.shared.web.exception.dto.MensagemCampo;
@@ -28,34 +29,13 @@ public class GlobalExceptionHandler {
             TipoErroDominio.CONFLITO, HttpStatus.CONFLICT
     );
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErroDTO> handleEntityNotFoundException (EntityNotFoundException e, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.NOT_FOUND;
+    @ExceptionHandler(DominioException.class)
+    public ResponseEntity<ErroDTO> dominioExceptionHandler(DominioException e, HttpServletRequest request) {
+        HttpStatus status = MAP_ERRO_STATUS.get(e.getErroDominio());
 
-        ErroDTO erro = new ErroDTO(e.getMessage(), request.getRequestURI(),
-                status.value(), Instant.now());
+        ErroDTO erro = new ErroDTO(e.getMessage(), request.getRequestURI(), status.value(), Instant.now());
 
-        return ResponseEntity.status(status).body(erro);
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErroDTO> handleBadCredentialsException(BadCredentialsException e, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.UNAUTHORIZED;
-
-        ErroDTO erro = new ErroDTO("E-mail, ou senha incorretos", request.getRequestURI(),
-                status.value(), Instant.now());
-
-        return ResponseEntity.status(status).body(erro);
-    }
-
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErroDTO> handleDataIntegrityViolationException(DataIntegrityViolationException e, HttpServletRequest request) {
-        HttpStatus status = HttpStatus.CONFLICT;
-
-        ErroDTO erro = new ErroDTO("E-mail já registrado", request.getRequestURI(),
-                status.value(), Instant.now());
-
-        return ResponseEntity.status(status).body(erro);
+        return ResponseEntity.status(status.value()).body(erro);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
