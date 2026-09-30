@@ -1,5 +1,6 @@
 package br.com.marceloneuro.mtgtrade.shared.web.exception;
 
+import br.com.marceloneuro.mtgtrade.shared.exception.TipoErroDominio;
 import br.com.marceloneuro.mtgtrade.shared.web.exception.dto.ErroDTO;
 import br.com.marceloneuro.mtgtrade.shared.web.exception.dto.MensagemCampo;
 import br.com.marceloneuro.mtgtrade.shared.web.exception.dto.ValidationErroDTO;
@@ -14,9 +15,18 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    // Mapeia os TipoErroDominio com os HttpStatus, para acessar os status dos erros em O(1).
+    // Também delega ao Handler decidir o erro sem a lógica interna vazar para o controller.
+    private static final Map<TipoErroDominio, HttpStatus> MAP_ERRO_STATUS = Map.of(
+            TipoErroDominio.RECURSO_NAO_ENCONTRADO, HttpStatus.NOT_FOUND,
+            TipoErroDominio.FALHA_LOGIN, HttpStatus.UNAUTHORIZED,
+            TipoErroDominio.CONFLITO, HttpStatus.CONFLICT
+    );
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErroDTO> handleEntityNotFoundException (EntityNotFoundException e, HttpServletRequest request) {
