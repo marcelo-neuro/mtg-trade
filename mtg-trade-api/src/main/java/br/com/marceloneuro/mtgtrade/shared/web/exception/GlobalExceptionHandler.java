@@ -2,15 +2,12 @@ package br.com.marceloneuro.mtgtrade.shared.web.exception;
 
 import br.com.marceloneuro.mtgtrade.shared.exception.DominioException;
 import br.com.marceloneuro.mtgtrade.shared.exception.TipoErroDominio;
-import br.com.marceloneuro.mtgtrade.shared.web.exception.dto.ErroDTO;
 import br.com.marceloneuro.mtgtrade.shared.web.exception.dto.MensagemCampo;
 import br.com.marceloneuro.mtgtrade.shared.web.exception.dto.ValidationErroDTO;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -30,10 +27,17 @@ public class GlobalExceptionHandler {
     );
 
     @ExceptionHandler(DominioException.class)
-    public ResponseEntity<ErroDTO> dominioExceptionHandler(DominioException e, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> dominioExceptionHandler(DominioException e, HttpServletRequest request) {
         HttpStatus status = MAP_ERRO_STATUS.get(e.getErroDominio());
+        ProblemDetail erro = ProblemDetail.forStatusAndDetail(status, e.getMessage());
+        erro.setTitle(e.getTitulo());
 
-        ErroDTO erro = new ErroDTO(e.getMessage(), request.getRequestURI(), status.value(), Instant.now());
+        // O ProblemDetail permite a adição de propriedades customizadas, aqui adicionamos "código", "uri" e "timestamp"
+        erro.setProperties(Map.of(
+                "código", e.getCodigo(),
+                "uri", request.getRequestURI(),
+                "timestamp", Instant.now()
+        ));
 
         return ResponseEntity.status(status.value()).body(erro);
     }
@@ -41,10 +45,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErroDTO> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.UNPROCESSABLE_CONTENT;
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, "Erro de validação nos dados enviados.");
 
-        ValidationErroDTO erros = new ValidationErroDTO("Erro de validação nos dados enviados.", request.getRequestURI(),
-                status.value(), Instant.now());
+        problemDetail.setTitle("Erro de Validação");
+        problemDetail.setProperties(Map.of(
+                "código", "VAL-001",
+                "uri", request.getRequestURI(),
+                "timestamp", Instant.now()
+        ));
 
+        ValidationErroDTO erros = new ValidationErroDTO(problemDetail);
         e.getBindingResult()
                 .getFieldErrors()
                 .forEach(fe -> erros.adicionarCampo(new MensagemCampo(fe.getField(), fe.getDefaultMessage())));
