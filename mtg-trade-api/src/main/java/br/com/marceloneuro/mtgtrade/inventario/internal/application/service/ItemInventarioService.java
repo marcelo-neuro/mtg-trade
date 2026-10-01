@@ -5,9 +5,11 @@ import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.AdicionarItemRequestDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.AtualizarItemRequestDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.ItemInventarioResponseDTO;
+import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.validation.ValidadorItemInventario;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Estado;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Idioma;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.ItemInventario;
+import br.com.marceloneuro.mtgtrade.inventario.internal.domain.exception.ItemNaoEncontradoException;
 import br.com.marceloneuro.mtgtrade.inventario.internal.infrastructure.ItemInventarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -25,15 +27,20 @@ public class ItemInventarioService {
 
     private final CatalogoFacade catalogoFacade;
     private final ItemInventarioRepository itemInventarioRepository;
+    private final List<ValidadorItemInventario> validadores;
 
     // Esse trecho é responsável por adicionar um item ao inventário de um usuário,
     // caso o item já exista ele deve somar a quantidade ao item já criado na tabela.
     @Transactional
     public ItemInventarioResponseDTO adicionarItem(String usuarioId, AdicionarItemRequestDTO request) {
-        ItemInventario itemInventarioAdicionado = null;
-
         UUID uuidUsuario = UUID.fromString(usuarioId);
         UUID uuidCartaCatalogo = UUID.fromString(request.cartaCatalogoId());
+        CartaCatalogoDTO cartaCatalogo = catalogoFacade.obterPorId(uuidCartaCatalogo);
+
+        validadores.forEach(validador -> validador.validar(request, cartaCatalogo));
+
+        ItemInventario itemInventarioAdicionado = null;
+
         Estado estadoItem = Estado.valueOf(request.estado().trim().toUpperCase());
         Idioma idiomaItem = Idioma.valueOf(request.idioma().trim().toUpperCase());
 
@@ -59,7 +66,7 @@ public class ItemInventarioService {
         }
 
         ItemInventario itemSalvo = itemInventarioRepository.save(itemInventarioAdicionado);
-        CartaCatalogoDTO cartaCatalogo = catalogoFacade.obterPorId(uuidCartaCatalogo);
+
         return new ItemInventarioResponseDTO(itemSalvo, cartaCatalogo);
     }
 
@@ -86,7 +93,7 @@ public class ItemInventarioService {
     @Transactional(readOnly = true)
     public ItemInventarioResponseDTO buscarItemPorId(String usuarioId, String itemId) {
         ItemInventario itemInventario = itemInventarioRepository.findByIdAndUsuarioId(UUID.fromString(itemId), UUID.fromString(usuarioId))
-                .orElseThrow(() -> new EntityNotFoundException("Item não existente no inventário do usuário."));
+                .orElseThrow(() -> new ItemNaoEncontradoException("Item não existente no inventário do usuário."));
 
         CartaCatalogoDTO detalhesCarta = catalogoFacade.obterPorId(itemInventario.getCartaCatalogoId());
 
@@ -101,8 +108,13 @@ public class ItemInventarioService {
     public ItemInventarioResponseDTO atualizarItem(String usuarioId, String itemId, AtualizarItemRequestDTO request) {
         UUID uuidItem = UUID.fromString(itemId);
         UUID uuidUsuario = UUID.fromString(usuarioId);
+
         ItemInventario itemOriginal = itemInventarioRepository.findByIdAndUsuarioId(uuidItem, uuidUsuario)
-                .orElseThrow(() -> new EntityNotFoundException("Item não existente no inventário desse usuário."));
+                .orElseThrow(() -> new ItemNaoEncontradoException("Item não existente no inventário desse usuário."));
+
+        CartaCatalogoDTO cartaCatalogo = catalogoFacade.obterPorId(itemOriginal.getCartaCatalogoId());
+
+        validadores.forEach(validador -> validador.validar(request, cartaCatalogo));
 
         Estado estadoItem = Estado.valueOf(request.estado().trim().toUpperCase());
         Idioma idiomaItem = Idioma.valueOf(request.idioma().trim().toUpperCase());
@@ -112,8 +124,6 @@ public class ItemInventarioService {
         Optional<ItemInventario> destinoOpt = itemInventarioRepository
                 .findByUsuarioIdAndCartaCatalogoIdAndAcabamentoAndPromoAndEstadoAndIdioma(uuidUsuario, itemOriginal.getCartaCatalogoId(),
                         request.acabamento(), request.promo(), estadoItem, idiomaItem);
-
-        CartaCatalogoDTO cartaCatalogo = catalogoFacade.obterPorId(itemOriginal.getCartaCatalogoId());
 
         ItemInventario itemSalvo;
         // Caso o item exista nós verificamos se eles não são o mesmo registro (ID)
@@ -139,14 +149,14 @@ public class ItemInventarioService {
             itemSalvo.setIdioma(idiomaItem);
         }
 
-         itemSalvo = itemInventarioRepository.save(itemSalvo);
+        itemSalvo = itemInventarioRepository.save(itemSalvo);
         return new ItemInventarioResponseDTO(itemSalvo, cartaCatalogo);
     }
 
     @Transactional
     public void removerItem(String usuarioId, String itemId) {
         ItemInventario itemInventario = itemInventarioRepository.findByIdAndUsuarioId(UUID.fromString(itemId), UUID.fromString(usuarioId))
-                .orElseThrow(() -> new EntityNotFoundException("Item não existente no inventário do usuário."));
+                .orElseThrow(() -> new ItemNaoEncontradoException("Item não existente no inventário do usuário."));
 
         itemInventarioRepository.delete(itemInventario);
     }

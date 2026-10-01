@@ -2,9 +2,11 @@ package br.com.marceloneuro.mtgtrade.iam.internal.application.service;
 
 import br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto.RegistroUsuarioRequestDTO;
 import br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto.RegistroUsuarioResponseDTO;
+import br.com.marceloneuro.mtgtrade.iam.internal.domain.exception.UniqueNomeUsuarioEmailException;
 import br.com.marceloneuro.mtgtrade.iam.internal.domain.Usuario;
 import br.com.marceloneuro.mtgtrade.iam.internal.infrastructure.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,12 +22,23 @@ public class RegistroService {
     public RegistroUsuarioResponseDTO criarUsuario(RegistroUsuarioRequestDTO request) {
         Usuario novoUsuario = new Usuario();
 
+        if (usuarioRepository.existsByEmailOrNomeUsuario(request.email(), request.nomeUsuario())) {
+            throw new UniqueNomeUsuarioEmailException("Nome de usuário ou e-mail já cadastrados.");
+        }
+
         novoUsuario.setNomeUsuario(request.nomeUsuario());
         novoUsuario.setEmail(request.email());
         novoUsuario.setSenha(passwordEncoder.encode(request.senha()));
 
-        Usuario usuarioCriado = usuarioRepository.save(novoUsuario);
 
-        return new RegistroUsuarioResponseDTO(usuarioCriado.getNomeUsuario(), usuarioCriado.getEmail());
+
+        // A validação é feita novamente para em caso de concorrência ambos os usuários tenham passado pela verificação anterior.
+        try {
+            // Utiliza saveAndFlush para garantir que o banco faça o INSERT dentro do try catch.
+            Usuario usuarioCriado = usuarioRepository.saveAndFlush(novoUsuario);
+            return new RegistroUsuarioResponseDTO(usuarioCriado.getNomeUsuario(), usuarioCriado.getEmail());
+        } catch (DataIntegrityViolationException e) {
+            throw new UniqueNomeUsuarioEmailException("Nome de usuário ou e-mail já cadastrados.");
+        }
     }
 }

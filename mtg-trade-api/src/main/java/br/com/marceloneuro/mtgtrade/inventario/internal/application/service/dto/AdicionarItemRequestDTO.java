@@ -11,7 +11,7 @@ public record AdicionarItemRequestDTO(
         @NotBlank(message = "O acabamento da carta é obrigatório.")
         String acabamento,
 
-        @NotBlank(message = "O tipo de promo é obrigatório.")
+        @NotNull(message = "O tipo de promo é obrigatório.")
         String promo,
 
         @NotNull(message = "A quantidade é obrigatória.")
@@ -23,5 +23,5 @@ public record AdicionarItemRequestDTO(
 
         @NotBlank(message = "O idioma da carta é obrigatório.")
         String idioma
-) {
+) implements AtributosFisicosRequest{
 }
