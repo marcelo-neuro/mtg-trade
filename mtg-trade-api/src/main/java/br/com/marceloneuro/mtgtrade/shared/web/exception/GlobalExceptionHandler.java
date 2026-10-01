@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DominioException.class)
     public ResponseEntity<ProblemDetail> dominioExceptionHandler(DominioException e, HttpServletRequest request) {
-        HttpStatus status = MAP_ERRO_STATUS.get(e.getErroDominio());
+        HttpStatus status = MAP_ERRO_STATUS.getOrDefault(e.getErroDominio(), HttpStatus.INTERNAL_SERVER_ERROR);
         ProblemDetail erro = ProblemDetail.forStatusAndDetail(status, e.getMessage());
         erro.setTitle(e.getTitulo());
         erro.setInstance(URI.create(request.getRequestURI()));
