@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.net.URI;
 import java.time.Instant;
 import java.util.Map;
 
@@ -31,11 +32,11 @@ public class GlobalExceptionHandler {
         HttpStatus status = MAP_ERRO_STATUS.get(e.getErroDominio());
         ProblemDetail erro = ProblemDetail.forStatusAndDetail(status, e.getMessage());
         erro.setTitle(e.getTitulo());
+        erro.setInstance(URI.create(request.getRequestURI()));
 
         // O ProblemDetail permite a adição de propriedades customizadas, aqui adicionamos "código", "uri" e "timestamp"
         erro.setProperties(Map.of(
                 "código", e.getCodigo(),
-                "uri", request.getRequestURI(),
                 "timestamp", Instant.now()
         ));
 
@@ -46,11 +47,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ValidationErroDTO> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.UNPROCESSABLE_CONTENT;
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, "Erro de validação nos dados enviados.");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
 
         problemDetail.setTitle("Erro de Validação");
         problemDetail.setProperties(Map.of(
                 "código", "VAL-001",
-                "uri", request.getRequestURI(),
                 "timestamp", Instant.now()
         ));
 
