@@ -3,6 +3,7 @@ package br.com.marceloneuro.mtgtrade.inventario.internal.application.service.val
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.AtributosFisicosRequest;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Idioma;
+import br.com.marceloneuro.mtgtrade.inventario.internal.domain.exception.ViolacaoEstadoFisicoException;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -15,7 +16,7 @@ public class ValidarIdioma implements ValidadorItemInventario {
                 .anyMatch(idioma -> idioma.name().equalsIgnoreCase(request.idioma().trim()));
 
         if (!idiomaValido) {
-            throw new IllegalArgumentException("Idioma não existente.");
+            throw new ViolacaoEstadoFisicoException("Idioma não existente.");
         }
     }
 }
