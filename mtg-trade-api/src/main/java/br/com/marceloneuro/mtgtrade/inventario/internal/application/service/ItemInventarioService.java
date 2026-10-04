@@ -81,13 +81,10 @@ public class ItemInventarioService {
                 .stream().map(ItemInventario::getCartaCatalogoId)
                 .collect(Collectors.toSet());
 
-        Map<String, CartaCatalogoDTO> mapDetalhesCartas = catalogoFacade.buscaPorConjuntoIds(uuidsDetalhesCartas)
-                .stream().collect(Collectors.toMap(// Chave / Valor
-                   CartaCatalogoDTO::id, detalhesCarta -> detalhesCarta
-                ));
+        Map<UUID, CartaCatalogoDTO> mapDetalhesCartas = catalogoFacade.buscaPorConjuntoIdsMap(uuidsDetalhesCartas);
 
         return itens
-                .map(item -> new ItemInventarioResponseDTO(item, mapDetalhesCartas.get(item.getCartaCatalogoId().toString())));
+                .map(item -> new ItemInventarioResponseDTO(item, mapDetalhesCartas.get(item.getCartaCatalogoId())));
     }
 
     @Transactional(readOnly = true)
