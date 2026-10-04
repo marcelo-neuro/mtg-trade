@@ -4,12 +4,13 @@ import br.com.marceloneuro.mtgtrade.catalogo.api.CatalogoFacade;
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.domain.exception.CartaCatalogoNaoEncontradaException;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.CatalogoRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -69,5 +70,14 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
                         cartaCatalogo.getImagemVersoUrl()
                 ))
                 .toList();
+    }
+
+    @Override
+    public Map<UUID, CartaCatalogoDTO> buscaPorConjuntoIdsMap(Iterable<UUID> conjuntoIds) {
+        return buscaPorConjuntoIds(conjuntoIds)
+                .stream().collect(Collectors.toMap(
+                        cartaCatalogoDTO -> UUID.fromString(cartaCatalogoDTO.id()),
+                        detalhesCarta -> detalhesCarta
+                ));
     }
 }
