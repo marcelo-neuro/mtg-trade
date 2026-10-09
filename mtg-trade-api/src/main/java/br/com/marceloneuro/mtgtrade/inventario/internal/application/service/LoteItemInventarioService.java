@@ -51,4 +51,14 @@ public class LoteItemInventarioService {
             validadores.forEach(validador -> validador.validar(item, detalhesCarta));
         });
     }
+
+    // Criado para servir como chave de mapeamento dos itens físicos buscados no inventário para evitar N+1.
+    private record ChaveFisica(
+        UUID uuidCartaCatalogo,
+        String acabamento,
+        String tipoPromo,
+        Estado estado,
+        Idioma idioma
+    ) {
+    }
 }
