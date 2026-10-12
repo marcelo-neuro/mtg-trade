@@ -1,9 +1,8 @@
 package br.com.marceloneuro.mtgtrade.inventario.internal.web;
 
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.ItemInventarioService;
-import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.AdicionarItemRequestDTO;
-import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.AtualizarItemRequestDTO;
-import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.ItemInventarioResponseDTO;
+import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.LoteItemInventarioService;
+import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class ItemInventarioController {
 
     private final ItemInventarioService itemInventarioService;
+    private final LoteItemInventarioService loteItemInventarioService;
 
     // Normalmente quando criamos um registro retornamos um 201 (CREATED), com um header de Location,
     // nesse caso não faremos isso, uma vez que estamos realizando um Upsert, não podemos retornar um 201 se nada foi criado,
@@ -27,6 +27,15 @@ public class ItemInventarioController {
             @Valid @RequestBody AdicionarItemRequestDTO request) {
 
         return ResponseEntity.ok(itemInventarioService.adicionarItem(usuarioId, request));
+    }
+
+    // O mesmo se aplica para essa requisição, como estamos fazendo um bulk upsert retornamos um 200 (Ok)
+    @PostMapping("/lote")
+    public ResponseEntity<LoteItemInventarioResponseDTO> adicionarEmLote(
+            @RequestHeader("X-User-Id") String usuarioId,
+            @Valid @RequestBody LoteItemInventarioRequestDTO request) {
+
+        return ResponseEntity.ok(loteItemInventarioService.adicionarPorLote(usuarioId, request));
     }
 
     @GetMapping
