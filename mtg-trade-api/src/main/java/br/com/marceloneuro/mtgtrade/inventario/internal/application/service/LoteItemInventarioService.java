@@ -4,20 +4,19 @@ import br.com.marceloneuro.mtgtrade.catalogo.api.CatalogoFacade;
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.domain.exception.CartaCatalogoNaoEncontradaException;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.AdicionarItemRequestDTO;
+import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.ItemInventarioResponseDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.LoteItemInventarioRequestDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.LoteItemInventarioResponseDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.validation.ValidadorItemInventario;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Estado;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Idioma;
+import br.com.marceloneuro.mtgtrade.inventario.internal.domain.ItemInventario;
 import br.com.marceloneuro.mtgtrade.inventario.internal.infrastructure.ItemInventarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +32,9 @@ public class LoteItemInventarioService {
     // Esse bulk upsert sofre do mesmo problema do upsert, porém temos uma nova ocorrência de N+1
     // Aqui precisamos evitar N+1 na busca das cartas do catálogo e na validação de duplicatas.
     // Além disso, caso o usuário envie a lista com 2 itens identicos precisamos validar para que as quantidades sejam somadas.
+    // O Hibernate não permite a cláusula IN com tuplas, o que nos leva a duas opções:
+    // 1. Caimos no N+1 para buscar as cartas já existentes
+    // 2. Buscamos todas as cartas da requisição no inventário e mapeamos com as chaves físicas
     @Transactional
     public LoteItemInventarioResponseDTO adicionarPorLote(String usuarioId, LoteItemInventarioRequestDTO request) {
         List<AdicionarItemRequestDTO> lista = request.lista();
@@ -68,6 +70,55 @@ public class LoteItemInventarioService {
                         // Condição de duplicata: caso duas linhas tenham a mesma ChaveFisica a função será chamada para atribuir um novo valor
                         Integer::sum
                 ));
+
+        // Cartas com UUID já registradas no inventário
+        List<ItemInventario> itensRegistrados = itemInventarioRepository
+                .findByUsuarioIdAndCartaCatalogoIdIn(UUID.fromString(usuarioId), uuidsDetalheCartas);
+
+        // Mapeamos os itens registrados com a suas ChavesFisicas, para então buscá-los mais facilmente.
+        Map<ChaveFisica, ItemInventario> mapItensRegistrados = itensRegistrados.stream()
+                .collect(Collectors.toMap(
+                        item -> new ChaveFisica(
+                                item.getCartaCatalogoId(),
+                                item.getAcabamento(),
+                                item.getPromo(),
+                                item.getEstado(),
+                                item.getIdioma()
+                        ),
+                        item -> item
+                ));
+
+        List<ItemInventario> itensParaSalvar = new ArrayList<>();
+
+        // Iteramos pelo mapa de quantidade que já possui a ChaveFisica e quantidade de todas as cartas da requisição.
+        quantidadesMap.forEach(((chaveFisica, quantidade) -> {
+
+            ItemInventario itemParaSalvar = null;
+            itemParaSalvar = mapItensRegistrados.get(chaveFisica);
+
+            if (itemParaSalvar != null) {
+                // Caso o item já esteja no banco nós apenas adicionamos a quantidade
+                itemParaSalvar.setQuantidade(itemParaSalvar.getQuantidade() + quantidade);
+            } else {
+                // Caso o item não esteja no banco criamos um
+                itemParaSalvar = new ItemInventario();
+                itemParaSalvar.setUsuarioId(UUID.fromString(usuarioId));
+                itemParaSalvar.setCartaCatalogoId(chaveFisica.uuidCartaCatalogo());
+                itemParaSalvar.setAcabamento(chaveFisica.acabamento());
+                itemParaSalvar.setPromo(chaveFisica.tipoPromo());
+                itemParaSalvar.setQuantidade(quantidade);
+                itemParaSalvar.setEstado(chaveFisica.estado());
+                itemParaSalvar.setIdioma(chaveFisica.idioma());
+            }
+
+            itensParaSalvar.add(itemParaSalvar);
+        }));
+
+        List<ItemInventario> itensSalvos = itemInventarioRepository.saveAll(itensParaSalvar);
+
+        return new LoteItemInventarioResponseDTO(itensSalvos.stream()
+                .map(itemInventario -> new ItemInventarioResponseDTO(itemInventario, detalhesCartas.get(itemInventario.getCartaCatalogoId())))
+                .toList());
     }
 
     // Criado para servir como chave de mapeamento dos itens físicos buscados no inventário para evitar N+1.
