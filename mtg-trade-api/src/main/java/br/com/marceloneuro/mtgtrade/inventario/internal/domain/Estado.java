@@ -5,17 +5,19 @@ import lombok.Getter;
 @Getter
 // Estado de conservação em que a carta se encontra
 public enum Estado {
-    MINT(5),
-    NEAR_MIN(4),
-    SLIGHTLY_PLAYED(3),
-    MODERATELY_PLAYED(2),
-    HEAVILY_PLAYED(1),
-    DAMAGED(0);
+    M(5, "Mint"),
+    NM(4, "Near Mint"),
+    SP(3, "Slightly Played"),
+    MP(2, "Moderately Played"),
+    HP(1, "Heavily Played"),
+    DM(0, "Damaged");
 
     private int peso;
+    private String descricao;
 
-    Estado (int peso) {
+    Estado (int peso, String descricao) {
         this.peso = peso;
+        this.descricao = descricao;
     }
 
 }
