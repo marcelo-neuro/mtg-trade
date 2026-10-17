@@ -3,7 +3,7 @@ package br.com.marceloneuro.mtgtrade.catalogo.internal.facade;
 import br.com.marceloneuro.mtgtrade.catalogo.api.CatalogoFacade;
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.domain.exception.CartaCatalogoNaoEncontradaException;
-import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.CatalogoRepository;
+import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.repository.CatalogoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

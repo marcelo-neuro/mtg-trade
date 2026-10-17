@@ -1,7 +1,7 @@
 package br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.scryfall;
 
 import br.com.marceloneuro.mtgtrade.catalogo.internal.domain.CartaCatalogo;
-import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.CatalogoRepository;
+import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.repository.CatalogoRepository;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.scryfall.exceptions.ScryfallLayoutException;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.scryfall.exceptions.ScryfallMissingImageException;
 import lombok.RequiredArgsConstructor;

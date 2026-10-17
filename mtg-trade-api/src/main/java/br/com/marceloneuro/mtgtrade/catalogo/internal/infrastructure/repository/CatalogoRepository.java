@@ -1,4 +1,4 @@
-package br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure;
+package br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.repository;
 
 import br.com.marceloneuro.mtgtrade.catalogo.internal.domain.CartaCatalogo;
 import org.springframework.data.domain.Page;
