@@ -21,6 +21,8 @@ record CartaScryfallDTO(
         String layout,
         @JsonProperty("promo")
         Boolean promo,
+        @JsonProperty("collector_number")
+        String collectorNumber,
 
         @JsonProperty("image_uris")
         ImageUrisScryfallDTO imageUris,
