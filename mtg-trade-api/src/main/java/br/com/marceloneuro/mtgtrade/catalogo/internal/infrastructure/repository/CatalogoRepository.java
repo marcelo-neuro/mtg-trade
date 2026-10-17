@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -17,4 +18,7 @@ public interface CatalogoRepository extends JpaRepository<CartaCatalogo, UUID> {
 
     @Query("SELECT c.printId from CartaCatalogo c")
     Set<String> findAllPrintsIds();
+
+    @Query("SELECT c.printId as printId, c.dataHash as dataHash FROM CartaCatalogo c")
+    List<CartaCacheProjection> buscarCacheETL();
 }
