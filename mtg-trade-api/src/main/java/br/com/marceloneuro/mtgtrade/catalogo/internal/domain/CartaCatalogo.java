@@ -55,6 +55,10 @@ public class CartaCatalogo {
     @Column(name = "tipos_promo", length = 100)
     private String tiposPromo;
 
+    // É um código que indentifica a carta em um set
+    @Column(name = "numero_colecionador")
+    private String numeroColecionador;
+
     @Column(name = "promo")
     private Boolean isPromo;
 }
