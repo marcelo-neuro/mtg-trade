@@ -61,4 +61,10 @@ public class CartaCatalogo {
 
     @Column(name = "promo")
     private Boolean isPromo;
+
+    // Hash que representa os dados da carta, será utilizado para saber se os dados da carta foram atualizados durante o ETL.
+    // Será util para caso adicionemos novas colunas a entidade, uma vez que precisamos comparar apenas esse campo
+    // para saber se a carta vinda do Scryfall está diferente no banco
+    @Column(name = "data_hash")
+    private String dataHash;
 }
