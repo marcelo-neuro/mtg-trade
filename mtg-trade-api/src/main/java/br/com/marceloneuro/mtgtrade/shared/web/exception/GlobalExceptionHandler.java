@@ -24,7 +24,8 @@ public class GlobalExceptionHandler {
     private static final Map<TipoErroDominio, HttpStatus> MAP_ERRO_STATUS = Map.of(
             TipoErroDominio.RECURSO_NAO_ENCONTRADO, HttpStatus.NOT_FOUND,
             TipoErroDominio.FALHA_LOGIN, HttpStatus.UNAUTHORIZED,
-            TipoErroDominio.CONFLITO, HttpStatus.CONFLICT
+            TipoErroDominio.CONFLITO, HttpStatus.CONFLICT,
+            TipoErroDominio.VIOLACAO_REGRA_NEGOCIO, HttpStatus.BAD_REQUEST
     );
 
     @ExceptionHandler(DominioException.class)

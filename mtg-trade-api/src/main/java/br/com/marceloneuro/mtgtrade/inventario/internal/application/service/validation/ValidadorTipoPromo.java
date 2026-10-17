@@ -2,6 +2,7 @@ package br.com.marceloneuro.mtgtrade.inventario.internal.application.service.val
 
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.AtributosFisicosRequest;
+import br.com.marceloneuro.mtgtrade.inventario.internal.domain.exception.ViolacaoEstadoFisicoException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,11 +17,11 @@ public class ValidadorTipoPromo implements ValidadorItemInventario{
         }
 
         if (!cartaCatalogo.isPromo()) {
-            throw new IllegalArgumentException("A carta selecionada não possui opção promocional.");
+            throw new ViolacaoEstadoFisicoException("A carta selecionada não possui opção promocional.");
         }
 
         if (!cartaCatalogo.tiposPromo().contains(promoRequisitada)) {
-            throw new IllegalArgumentException("Opção promocional inválida para a carta selecionada.");
+            throw new ViolacaoEstadoFisicoException("Opção promocional inválida para a carta selecionada.");
         }
     }
 }

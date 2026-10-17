@@ -7,7 +7,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface ItemInventarioRepository extends JpaRepository<ItemInventario, UUID> {
@@ -19,4 +21,6 @@ public interface ItemInventarioRepository extends JpaRepository<ItemInventario, 
     Optional<ItemInventario> findByIdAndUsuarioId(UUID id, UUID usuarioId);
 
     Page<ItemInventario> findByUsuarioId(UUID usuarioId, Pageable pageable);
+
+    List<ItemInventario> findByUsuarioIdAndCartaCatalogoIdIn(UUID usuarioId, Set<UUID> cartaCatalogoId);
 }
