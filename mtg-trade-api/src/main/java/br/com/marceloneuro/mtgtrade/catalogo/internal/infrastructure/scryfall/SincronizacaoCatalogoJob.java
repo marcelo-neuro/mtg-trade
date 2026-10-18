@@ -1,6 +1,7 @@
 package br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.scryfall;
 
 import br.com.marceloneuro.mtgtrade.catalogo.internal.domain.CartaCatalogo;
+import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.repository.CartaCacheProjection;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.repository.CatalogoRepository;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.scryfall.exceptions.ScryfallLayoutException;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.scryfall.exceptions.ScryfallMissingImageException;
@@ -12,7 +13,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 @Service
@@ -26,7 +29,13 @@ public class SincronizacaoCatalogoJob {
     // Coordena o fluxo de ETL das cartas do Scryfall
     public void sincronizaCatalogo() {
         String urlBulk = scryfallClient.obtemUrlBulkDataRecente();
-        Set<String> todosPrintsIds = catalogoRepository.findAllPrintsIds();
+        // Cria Map para relacionar o printId com a assinatura hash da carta vinda do Scryfall
+        // PrintId, DataHash
+        Map<String, CartaCacheProjection> cacheCartas = catalogoRepository.buscarCacheETL()
+                .stream().collect(Collectors.toMap(
+                        CartaCacheProjection::getPrintId,
+                        projection -> projection
+                ));
 
         try {
             try (BufferedReader reader = new BufferedReader(
@@ -41,12 +50,17 @@ public class SincronizacaoCatalogoJob {
                 while ((linha = reader.readLine()) != null) {
                     try {
                         CartaCatalogo cartaConvertida = scryfallParser.converteLinhaJsonEmCartaCatalogo(linha);
+                        CartaCacheProjection cartaProjection = cacheCartas.get(cartaConvertida.getPrintId());
 
-                        // Resolve o problema de Delta Load verificando se a carta já está registrada no catálogo.
-                        if (todosPrintsIds.contains(cartaConvertida.getPrintId())) {
-                            continue;
+                        if (cartaProjection != null) {
+                            // Resolve o problema de Delta Load verificando se a carta já está registrada no catálogo, ou se teve alterações.
+                            if (cartaConvertida.getDataHash().equals(cartaProjection.getDataHash())) {
+                                continue;
+                            }
+
+                            cartaConvertida.setId(cacheCartas.get(cartaConvertida.getPrintId()).getId());
+
                         }
-
                         lista1000CartasCatalogo.add(cartaConvertida);
 
                         if (lista1000CartasCatalogo.size() == 1000) {
