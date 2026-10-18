@@ -1,4 +1,4 @@
-package br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto;
+package br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto;
 
 import java.util.List;
 
