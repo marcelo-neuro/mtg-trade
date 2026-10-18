@@ -19,6 +19,6 @@ public interface CatalogoRepository extends JpaRepository<CartaCatalogo, UUID> {
     @Query("SELECT c.printId from CartaCatalogo c")
     Set<String> findAllPrintsIds();
 
-    @Query("SELECT c.printId as printId, c.dataHash as dataHash FROM CartaCatalogo c")
+    @Query("SELECT c.printId as printId, c.dataHash as dataHash, c.id as id FROM CartaCatalogo c")
     List<CartaCacheProjection> buscarCacheETL();
 }
