@@ -39,6 +39,13 @@ class ScryfallParser {
         cartaCatalogoConvertida.setAcabamentos(converteOpcoesDetalhamentoParaString(cartaScryfallDto.finishes()));
         cartaCatalogoConvertida.setTiposPromo(converteOpcoesDetalhamentoParaString(cartaScryfallDto.promoTypes()));
 
+        // Carta de dupla face
+        if (cartaScryfallDto.imageUris() == null) {
+            converteCartaDuplaFace(cartaCatalogoConvertida, cartaScryfallDto.cardFaces());
+        } else {
+            cartaCatalogoConvertida.setImagemFrenteUrl(cartaScryfallDto.imageUris().normal());
+        }
+
         // Converte a entidade já criada para uma String que será utilizada para gerar o hash da carta, a fim de verificar se houve alteração na carta.
         String baseHash = (cartaCatalogoConvertida.getNome() != null ? cartaCatalogoConvertida.getNome() : "") + "|" +
                 (cartaCatalogoConvertida.getEdicao() != null ? cartaCatalogoConvertida.getEdicao() : "") + "|" +
@@ -50,17 +57,7 @@ class ScryfallParser {
 
         cartaCatalogoConvertida.setDataHash(HashUtil.gerarCheckSum(baseHash));
 
-        // Carta de dupla face
-        if (cartaScryfallDto.imageUris() == null) {
-            converteCartaDuplaFace(cartaCatalogoConvertida, cartaScryfallDto.cardFaces());
-            return  cartaCatalogoConvertida;
-        } else {
-            cartaCatalogoConvertida.setImagemFrenteUrl(cartaScryfallDto.imageUris().normal());
-
-            return cartaCatalogoConvertida;
-        }
-
-
+        return  cartaCatalogoConvertida;
     }
 
     private void converteCartaDuplaFace(CartaCatalogo cartaCatalogoConvertida, List<CartaScryfallDTO.CardFaceScryfallDTO> cardFaceScryfallDto) {
