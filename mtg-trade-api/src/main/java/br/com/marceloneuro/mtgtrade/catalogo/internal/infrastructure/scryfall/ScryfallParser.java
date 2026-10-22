@@ -3,6 +3,7 @@ package br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.scryfall;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.domain.CartaCatalogo;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.scryfall.exceptions.ScryfallLayoutException;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.scryfall.exceptions.ScryfallMissingImageException;
+import br.com.marceloneuro.mtgtrade.shared.util.HashUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
@@ -32,6 +33,8 @@ class ScryfallParser {
         cartaCatalogoConvertida.setPrintId(cartaScryfallDto.id());
         cartaCatalogoConvertida.setNome(cartaScryfallDto.name());
         cartaCatalogoConvertida.setEdicao(cartaScryfallDto.setName());
+        cartaCatalogoConvertida.setSiglaEdicao(cartaScryfallDto.set().toUpperCase());
+        cartaCatalogoConvertida.setNumeroColecionador(cartaScryfallDto.collectorNumber());
         cartaCatalogoConvertida.setIsPromo(cartaScryfallDto.promo());
 
         cartaCatalogoConvertida.setAcabamentos(converteOpcoesDetalhamentoParaString(cartaScryfallDto.finishes()));
@@ -40,12 +43,23 @@ class ScryfallParser {
         // Carta de dupla face
         if (cartaScryfallDto.imageUris() == null) {
             converteCartaDuplaFace(cartaCatalogoConvertida, cartaScryfallDto.cardFaces());
-            return  cartaCatalogoConvertida;
+        } else {
+            cartaCatalogoConvertida.setImagemFrenteUrl(cartaScryfallDto.imageUris().normal());
         }
 
-        cartaCatalogoConvertida.setImagemFrenteUrl(cartaScryfallDto.imageUris().normal());
+        // Converte a entidade já criada para uma String que será utilizada para gerar o hash da carta, a fim de verificar se houve alteração na carta.
+        String baseHash = (cartaCatalogoConvertida.getNome() != null ? cartaCatalogoConvertida.getNome() : "") + "|" +
+                (cartaCatalogoConvertida.getEdicao() != null ? cartaCatalogoConvertida.getEdicao() : "") + "|" +
+                (cartaCatalogoConvertida.getSiglaEdicao() != null ? cartaCatalogoConvertida.getSiglaEdicao() : "") + "|" +
+                (cartaCatalogoConvertida.getImagemFrenteUrl() != null ? cartaCatalogoConvertida.getImagemFrenteUrl() : "") + "|" +
+                (cartaCatalogoConvertida.getImagemVersoUrl() != null ? cartaCatalogoConvertida.getImagemVersoUrl() : "") + "|" +
+                (cartaCatalogoConvertida.getAcabamentos() != null ? cartaCatalogoConvertida.getAcabamentos() : "") + "|" +
+                (cartaCatalogoConvertida.getTiposPromo() != null ? cartaCatalogoConvertida.getTiposPromo() : "") + "|" +
+                (cartaCatalogoConvertida.getNumeroColecionador() != null ? cartaCatalogoConvertida.getNumeroColecionador() : "");
 
-        return cartaCatalogoConvertida;
+        cartaCatalogoConvertida.setDataHash(HashUtil.gerarCheckSum(baseHash));
+
+        return  cartaCatalogoConvertida;
     }
 
     private void converteCartaDuplaFace(CartaCatalogo cartaCatalogoConvertida, List<CartaScryfallDTO.CardFaceScryfallDTO> cardFaceScryfallDto) {

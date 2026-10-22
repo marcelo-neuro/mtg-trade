@@ -1,7 +1,7 @@
 package br.com.marceloneuro.mtgtrade.catalogo.internal.application.service;
 
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
-import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.CatalogoRepository;
+import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.repository.CatalogoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,11 +22,13 @@ public class CatalogoService {
                         cartaCatalogo.getPrintId(),
                         cartaCatalogo.getNome(),
                         cartaCatalogo.getEdicao(),
+                        cartaCatalogo.getSiglaEdicao(),
                         cartaCatalogo.getAcabamentos(),
                         cartaCatalogo.getTiposPromo(),
                         cartaCatalogo.getIsPromo(),
                         cartaCatalogo.getImagemFrenteUrl(),
-                        cartaCatalogo.getImagemVersoUrl()
+                        cartaCatalogo.getImagemVersoUrl(),
+                        cartaCatalogo.getNumeroColecionador()
                 ));
     }
 }

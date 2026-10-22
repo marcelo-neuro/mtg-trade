@@ -6,10 +6,12 @@ public record CartaCatalogoDTO(
         String printId,
         String nome,
         String edicao,
+        String siglaEdicao,
         String acabamentos,
         String tiposPromo,
         Boolean isPromo,
         String imagemFrenteUrl,
-        String imagemVersoUrl
+        String imagemVersoUrl,
+        String numeroColecionador
 ) {
 }

@@ -2,13 +2,16 @@ package br.com.marceloneuro.mtgtrade.catalogo.internal.facade;
 
 import br.com.marceloneuro.mtgtrade.catalogo.api.CatalogoFacade;
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
+import br.com.marceloneuro.mtgtrade.catalogo.api.dto.ChaveBuscaCatalogoDTO;
+import br.com.marceloneuro.mtgtrade.catalogo.internal.domain.CartaCatalogo;
 import br.com.marceloneuro.mtgtrade.catalogo.internal.domain.exception.CartaCatalogoNaoEncontradaException;
-import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.CatalogoRepository;
+import br.com.marceloneuro.mtgtrade.catalogo.internal.infrastructure.repository.CatalogoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,11 +30,13 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
                         cartaCatalogo.getPrintId(),
                         cartaCatalogo.getNome(),
                         cartaCatalogo.getEdicao(),
+                        cartaCatalogo.getSiglaEdicao(),
                         cartaCatalogo.getAcabamentos(),
                         cartaCatalogo.getTiposPromo(),
                         cartaCatalogo.getIsPromo(),
                         cartaCatalogo.getImagemFrenteUrl(),
-                        cartaCatalogo.getImagemVersoUrl()
+                        cartaCatalogo.getImagemVersoUrl(),
+                        cartaCatalogo.getNumeroColecionador()
                 ))
                 .orElseThrow(() -> new CartaCatalogoNaoEncontradaException("Carta não contrada por Print Id."));
     }
@@ -45,11 +50,13 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
                         cartaCatalogo.getPrintId(),
                         cartaCatalogo.getNome(),
                         cartaCatalogo.getEdicao(),
+                        cartaCatalogo.getSiglaEdicao(),
                         cartaCatalogo.getAcabamentos(),
                         cartaCatalogo.getTiposPromo(),
                         cartaCatalogo.getIsPromo(),
                         cartaCatalogo.getImagemFrenteUrl(),
-                        cartaCatalogo.getImagemVersoUrl()
+                        cartaCatalogo.getImagemVersoUrl(),
+                        cartaCatalogo.getNumeroColecionador()
                 ))
                 .orElseThrow(() -> new CartaCatalogoNaoEncontradaException("Carta não encontrada pelo Id."));
     }
@@ -63,11 +70,13 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
                         cartaCatalogo.getPrintId(),
                         cartaCatalogo.getNome(),
                         cartaCatalogo.getEdicao(),
+                        cartaCatalogo.getSiglaEdicao(),
                         cartaCatalogo.getAcabamentos(),
                         cartaCatalogo.getTiposPromo(),
                         cartaCatalogo.getIsPromo(),
                         cartaCatalogo.getImagemFrenteUrl(),
-                        cartaCatalogo.getImagemVersoUrl()
+                        cartaCatalogo.getImagemVersoUrl(),
+                        cartaCatalogo.getNumeroColecionador()
                 ))
                 .toList();
     }
@@ -78,6 +87,32 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
                 .stream().collect(Collectors.toMap(
                         cartaCatalogoDTO -> UUID.fromString(cartaCatalogoDTO.id()),
                         detalhesCarta -> detalhesCarta
+                ));
+    }
+
+    @Override
+    public Map<ChaveBuscaCatalogoDTO, CartaCatalogoDTO> buscarPorConjuntoEdicaoENumeroMap(Set<String> edicoes, Set<String> numerosColecionador) {
+        List<CartaCatalogo> cartasCatalogo = catalogoRepository.buscarPorLoteEdicaoENumero(edicoes, numerosColecionador);
+
+        return cartasCatalogo
+                .stream().collect(Collectors.toMap(
+                        carta -> new ChaveBuscaCatalogoDTO(carta.getSiglaEdicao(), carta.getNumeroColecionador()),
+                        cartaCatalogo -> new CartaCatalogoDTO(
+                                cartaCatalogo.getId().toString(),
+                                cartaCatalogo.getOracleId(),
+                                cartaCatalogo.getPrintId(),
+                                cartaCatalogo.getNome(),
+                                cartaCatalogo.getEdicao(),
+                                cartaCatalogo.getSiglaEdicao(),
+                                cartaCatalogo.getAcabamentos(),
+                                cartaCatalogo.getTiposPromo(),
+                                cartaCatalogo.getIsPromo(),
+                                cartaCatalogo.getImagemFrenteUrl(),
+                                cartaCatalogo.getImagemVersoUrl(),
+                                cartaCatalogo.getNumeroColecionador()
+                        ),
+                        // Blindagem para prevenir que duas cartas com a mesma chave possam causar um IllegalStateException: Duplicate key
+                        (existente, substituta) -> existente
                 ));
     }
 }

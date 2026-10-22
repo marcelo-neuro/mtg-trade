@@ -15,12 +15,16 @@ record CartaScryfallDTO(
         String name,
         @JsonProperty("set_name")
         String setName,
+        @JsonProperty("set")
+        String set,
         @JsonProperty("image_status")
         String imageStatus,
         @JsonProperty("layout")
         String layout,
         @JsonProperty("promo")
         Boolean promo,
+        @JsonProperty("collector_number")
+        String collectorNumber,
 
         @JsonProperty("image_uris")
         ImageUrisScryfallDTO imageUris,

@@ -38,6 +38,9 @@ public class CartaCatalogo {
     @Column(nullable = false)
     private String edicao;
 
+    @Column
+    private String siglaEdicao;
+
     @Column(name = "imagem_frente_url",nullable = false)
     private String imagemFrenteUrl;
 
@@ -55,6 +58,16 @@ public class CartaCatalogo {
     @Column(name = "tipos_promo", length = 100)
     private String tiposPromo;
 
+    // É um código que indentifica a carta em um set
+    @Column(name = "numero_colecionador")
+    private String numeroColecionador;
+
     @Column(name = "promo")
     private Boolean isPromo;
+
+    // Hash que representa os dados da carta, será utilizado para saber se os dados da carta foram atualizados durante o ETL.
+    // Será util para caso adicionemos novas colunas a entidade, uma vez que precisamos comparar apenas esse campo
+    // para saber se a carta vinda do Scryfall está diferente no banco
+    @Column(name = "data_hash")
+    private String dataHash;
 }
