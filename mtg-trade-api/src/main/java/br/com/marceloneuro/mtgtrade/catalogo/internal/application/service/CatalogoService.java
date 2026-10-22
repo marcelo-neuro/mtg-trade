@@ -22,6 +22,7 @@ public class CatalogoService {
                         cartaCatalogo.getPrintId(),
                         cartaCatalogo.getNome(),
                         cartaCatalogo.getEdicao(),
+                        cartaCatalogo.getSiglaEdicao(),
                         cartaCatalogo.getAcabamentos(),
                         cartaCatalogo.getTiposPromo(),
                         cartaCatalogo.getIsPromo(),
