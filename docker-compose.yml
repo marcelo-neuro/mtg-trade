@@ -20,7 +20,7 @@ services:
 
   monolito-mtg-trade-api:
     build:
-      context: ./monolito-mtg-trade-api
+      context: ./mtg-trade-api
       dockerfile: Dockerfile
     container_name: mtg-trade-api
     env_file:
