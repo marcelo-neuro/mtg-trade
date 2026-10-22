@@ -27,7 +27,7 @@ public interface CatalogoRepository extends JpaRepository<CartaCatalogo, UUID> {
     // Criamos um plano cartesiano de edicao x numeroColecionador e deixamos que a service faça a filtragem mais detalhada
     @Query("""
     SELECT c FROM CartaCatalogo c
-    WHERE UPPER(c.edicao) IN :edicoes
+    WHERE UPPER(c.siglaEdicao) IN :edicoes
     AND UPPER(c.numeroColecionador) IN :numeros
     """)
     List<CartaCatalogo> buscarPorLoteEdicaoENumero(
