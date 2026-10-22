@@ -96,8 +96,12 @@ public class TradutorListaService {
                     CartaCatalogoDTO detalhesCarta = mapDetalhesCarta.get(chaveCatalogo);
 
                     if (detalhesCarta != null) {
-                        List<String> acabamentos = Arrays.stream(detalhesCarta.acabamentos().split(",")).toList();
-                        List<String> promos = Arrays.stream(detalhesCarta.tiposPromo().split(",")).toList();
+                        List<String> acabamentos = detalhesCarta.tiposPromo() != null
+                                ? Arrays.stream(detalhesCarta.acabamentos().split(",")).toList()
+                                : List.of();
+                        List<String> promos = detalhesCarta.tiposPromo() != null
+                                ? Arrays.stream(detalhesCarta.tiposPromo().split(",")).toList()
+                                : List.of();
 
                         return new PreviaImportacaoItemResponseDTO(
                                 detalhesCarta.id(),
