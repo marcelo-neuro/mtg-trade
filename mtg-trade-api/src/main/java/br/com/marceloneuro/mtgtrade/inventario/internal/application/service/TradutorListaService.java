@@ -1,15 +1,14 @@
 package br.com.marceloneuro.mtgtrade.inventario.internal.application.service;
 
 import br.com.marceloneuro.mtgtrade.catalogo.api.CatalogoFacade;
+import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
+import br.com.marceloneuro.mtgtrade.catalogo.api.dto.ChaveBuscaCatalogoDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.ListaImportacaoRequestDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.PreviaImportacaoItemResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +30,9 @@ public class TradutorListaService {
             boolean formatoValido
     ) {}
 
+    // Passa o Regex pela lista e extrai todas as linhas para o DTO interno.
+    // Após isso puxa o map de ChaveBusca e CartaCatalogo do CatalogoFacade.
+    // Então iteramos pelas listas de linhas extraídas e organizamos a resposta.
     public List<PreviaImportacaoItemResponseDTO> gerarPreviaImportacao(ListaImportacaoRequestDTO request) {
         Set<String> setEdicoes = new HashSet<>();
         Set<String> setNumerosColecionador = new HashSet<>();
@@ -68,5 +70,60 @@ public class TradutorListaService {
                     }
                 });
 
+        Map<ChaveBuscaCatalogoDTO, CartaCatalogoDTO> mapDetalhesCarta = catalogoFacade
+                .buscarPorConjuntoEdicaoENumeroMap(setEdicoes, setNumerosColecionador);
+
+        return linhasExtraidas.stream()
+                .map(linha -> {
+
+                    if (!linha.formatoValido) {
+                        return new PreviaImportacaoItemResponseDTO(
+                                null,
+                                linha.linhaOriginal,
+                                null,
+                                null,
+                                null,
+                                null,
+                                List.of(),
+                                List.of(),
+                                false
+                        );
+                    }
+
+                    ChaveBuscaCatalogoDTO chaveCatalogo =
+                            new ChaveBuscaCatalogoDTO(linha.edicao(), linha.numeroColecionador());
+
+                    CartaCatalogoDTO detalhesCarta = mapDetalhesCarta.get(chaveCatalogo);
+
+                    if (detalhesCarta != null) {
+                        List<String> acabamentos = Arrays.stream(detalhesCarta.acabamentos().split(",")).toList();
+                        List<String> promos = Arrays.stream(detalhesCarta.tiposPromo().split(",")).toList();
+
+                        return new PreviaImportacaoItemResponseDTO(
+                                detalhesCarta.id(),
+                                detalhesCarta.nome(),
+                                detalhesCarta.edicao(),
+                                detalhesCarta.numeroColecionador(),
+                                linha.quantidade(),
+                                detalhesCarta.imagemFrenteUrl(),
+                                acabamentos,
+                                promos,
+                                true
+                        );
+                    } else {
+                        return new PreviaImportacaoItemResponseDTO(
+                                null,
+                                linha.linhaOriginal,
+                                null,
+                                null,
+                                null,
+                                null,
+                                List.of(),
+                                List.of(),
+                                false
+                        );
+                    }
+                }
+        ).toList();
     }
 }
