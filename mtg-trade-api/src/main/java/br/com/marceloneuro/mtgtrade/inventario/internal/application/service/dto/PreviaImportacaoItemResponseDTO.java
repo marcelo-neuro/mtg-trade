@@ -10,6 +10,7 @@ public record PreviaImportacaoItemResponseDTO(
         Integer quantidade,
         String imagemFrenteUrl,
         List<String> acabamentosDisponiveis,
+        List<String> promosDisponiveis,
         boolean encontradaNoCatalogo
 ) {
 }
