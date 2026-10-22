@@ -18,5 +18,21 @@ services:
       timeout: 5s
       retries: 5
 
+  monolito-mtg-trade-api:
+    build:
+      context: ./monolito-mtg-trade-api
+      dockerfile: Dockerfile
+    container_name: mtg-trade-api
+    env_file:
+      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-catalogo:5432/${POSTGRES_DB}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres-catalogo:
+        condition: service_healthy
+
+
 volumes:
   catalogo_data:
