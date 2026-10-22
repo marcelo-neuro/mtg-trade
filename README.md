@@ -39,10 +39,11 @@ O MTG Trade é organizado como um pequeno ecossistema de serviços:
 - **Gateway**: ponto de entrada HTTP na porta `9000`; diferencia rotas
   públicas e protegidas, valida tokens JWT e encaminha a identidade do usuário
   para a API.
-- **MTG Trade API**: aplicação principal na porta `8080`; concentra as regras
-  de identidade e acesso, catálogo e inventário.
+- **MTG Trade API**: aplicação principal na porta `8080` dentro da rede Docker;
+  concentra as regras de identidade e acesso, catálogo e inventário.
 - **PostgreSQL**: banco usado pela API para persistir usuários, cartas
-  catalogadas e itens de inventário.
+  catalogadas e itens de inventário. A porta `5433` é publicada apenas para
+  acesso local ao banco.
 
 O caminho recomendado para consumir a aplicação é o gateway. As rotas de login
 e registro são públicas; as demais exigem `Authorization: Bearer <token>`.
@@ -59,7 +60,7 @@ Gateway (Spring Cloud Gateway)
   `-- demais rotas -> valida JWT, injeta X-User-Id -> API :8080
                                       |
                                       v
-                              PostgreSQL :5433
+                              PostgreSQL :5432 (rede Docker)
                                       ^
                                       |
                              Scryfall Bulk Data
@@ -138,13 +139,14 @@ uniformes.
 
 ## Pré-requisitos
 
-- Java 21 ou superior.
 - Docker e Docker Compose.
 - Acesso à internet para a sincronização com o Scryfall.
-- Portas `5433`, `8080` e `9000` disponíveis.
+- Porta `9000` disponível para o gateway. A porta `5433` também deve estar
+  disponível caso você queira acessar o PostgreSQL diretamente pelo host.
 
-O Maven não precisa ser instalado separadamente: cada serviço possui o seu
-próprio Maven Wrapper.
+As imagens da API e do gateway são construídas pelos respectivos Dockerfiles,
+usando Java 21 e o Maven Wrapper durante o build. Não é necessário instalar
+Java ou Maven no host.
 
 ## Configuração
 
@@ -163,53 +165,62 @@ POSTGRES_PASSWORD=admin_password
 TOKEN_SECRET=troque-por-um-segredo-forte
 
 # Aplicações
+MONOLITO_URL=http://localhost:8080
 PORT_MTG_TRADE_API=8080
 GATEWAY_PORT=9000
 ```
 
-As mesmas variáveis são usadas pelo Docker Compose, pela API e pelo gateway.
+O Compose usa `MONOLITO_URL=http://monolito-mtg-trade-api:8080` para que o
+gateway encontre a API pelo nome do serviço na rede interna. Para a API, o
+Compose também sobrescreve a conexão do banco para usar
+`postgres-catalogo:5432`; portanto, `HOST_DB=localhost` e `PORT_DB=5433` são
+valores voltados ao acesso a partir do host.
+
 Em produção, substitua os valores de desenvolvimento, especialmente
 `POSTGRES_PASSWORD` e `TOKEN_SECRET`, por credenciais gerenciadas de forma
 segura.
 
 ## Como executar
 
-### 1. Subir o PostgreSQL
+### 1. Subir todo o ecossistema
 
-Na raiz do projeto:
+Na raiz do projeto, com o arquivo `.env` configurado:
 
 ```bash
-docker compose up -d postgres-catalogo
+docker compose up -d --build
 ```
 
-Para acompanhar o estado dos serviços:
+Esse comando:
+
+- cria o volume persistente `catalogo_data`;
+- inicia o PostgreSQL e aguarda o healthcheck;
+- constrói e inicia a API;
+- constrói e inicia o gateway, publicado em `http://localhost:9000`.
+
+Para acompanhar o estado dos serviços e os logs:
 
 ```bash
 docker compose ps
+docker compose logs -f
 ```
 
-### 2. Iniciar a API
+O serviço `monolito-mtg-trade-api` não publica uma porta no host. Ele é
+acessado pelo gateway através da rede interna do Compose.
 
-Em um terminal, ainda na raiz:
+### Reconstruir após alterações
 
 ```bash
-./mtg-trade-api/mvnw -f mtg-trade-api/pom.xml spring-boot:run
+docker compose up -d --build
 ```
 
-A API ficará disponível em `http://localhost:8080`.
-
-### 3. Iniciar o gateway
-
-Em outro terminal:
+Para reconstruir somente um serviço:
 
 ```bash
-./gateway/mvnw -f gateway/pom.xml spring-boot:run
+docker compose up -d --build monolito-mtg-trade-api
+docker compose up -d --build gateway
 ```
 
-O ponto de entrada recomendado ficará disponível em
-`http://localhost:9000`.
-
-### Encerrar a infraestrutura
+### Parar o ecossistema
 
 ```bash
 docker compose down
@@ -277,6 +288,8 @@ autenticado pelo gateway:
 | Método | Rota | Finalidade |
 | --- | --- | --- |
 | `POST` | `/api/v1/inventario` | Adicionar ou incrementar um item |
+| `POST` | `/api/v1/inventario/lote` | Adicionar ou incrementar vários itens em uma única operação |
+| `POST` | `/api/v1/inventario/lote/previa` | Validar uma lista no formato Moxfield e obter uma prévia da importação |
 | `GET` | `/api/v1/inventario` | Listar itens paginados do usuário |
 | `GET` | `/api/v1/inventario/{itemId}` | Consultar um item |
 | `PUT` | `/api/v1/inventario/{itemId}` | Atualizar atributos e quantidade |
@@ -301,6 +314,92 @@ curl -i -X POST http://localhost:9000/api/v1/inventario \
 As respostas de listagem seguem o formato paginado do Spring Data. Os valores
 aceitos para atributos enumerados e as regras detalhadas de validação estão
 implementados nos validadores do módulo de inventário.
+
+### Inserção de inventário em lote
+
+`POST /api/v1/inventario/lote` — protegido.
+
+Recebe uma lista de itens no mesmo formato da inclusão individual e executa um
+bulk upsert. Linhas com a mesma carta e os mesmos atributos físicos são
+consolidadas, somando as quantidades. Itens já existentes no inventário também
+recebem a quantidade enviada.
+
+```bash
+curl -i -X POST http://localhost:9000/api/v1/inventario/lote \
+  -H "Authorization: ******" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "lista": [
+      {
+        "cartaCatalogoId": "uuid-da-carta",
+        "acabamento": "NORMAL",
+        "promo": "NONE",
+        "quantidade": 2,
+        "estado": "NM",
+        "idioma": "PT"
+      },
+      {
+        "cartaCatalogoId": "outro-uuid",
+        "acabamento": "NORMAL",
+        "promo": "NONE",
+        "quantidade": 1,
+        "estado": "LP",
+        "idioma": "EN"
+      }
+    ]
+  }'
+```
+
+A resposta `200 OK` contém um objeto com a propriedade `lista`, formada pelos
+itens persistidos e seus detalhes de catálogo:
+
+```json
+{
+  "lista": [
+    {
+      "id": "uuid-do-item",
+      "acabamento": "NORMAL",
+      "promo": "NONE",
+      "quantidade": 2,
+      "estado": "NM",
+      "idioma": "Português",
+      "cartaCatalogoId": "uuid-da-carta",
+      "nome": "Nome da carta",
+      "edicao": "Edição",
+      "imagemFrenteUrl": "https://exemplo/imagem.jpg"
+    }
+  ]
+}
+```
+
+### Prévia de importação no formato Moxfield
+
+`POST /api/v1/inventario/lote/previa` — protegido.
+
+Permite conferir uma lista antes de persistir o inventário. O campo `lista`
+recebe texto com uma carta por linha, no formato:
+
+```text
+<quantidade> <nome da carta> (<sigla da edição>) <número de colecionador>
+```
+
+Exemplo:
+
+```bash
+curl -i -X POST http://localhost:9000/api/v1/inventario/lote/previa \
+  -H "Authorization: ******" \
+  -H 'Content-Type: application/json' \
+  --data-binary '{
+    "lista": "1 Emry, Lurker of the Loch (EOC) 71\n2 Sol Ring (CMM) 320"
+  }'
+```
+
+A resposta retorna uma entrada por linha, indicando se a carta foi encontrada
+no catálogo e, quando encontrada, seu identificador, detalhes da edição,
+imagem, quantidade e opções de acabamento e promoção. Linhas vazias,
+malformadas ou não encontradas são retornadas com
+`encontradaNoCatalogo: false` e podem ser corrigidas antes da chamada ao
+endpoint de lote.
 
 ## Testes
 
@@ -330,14 +429,18 @@ plataforma está organizada nos seguintes grandes épicos:
 - Provedor de identidade (IdP) artesanal isolado no monolito, malha de
   roteamento dinâmica (WebFlux) e segurança de borda validando JWT.
 
-### Épico 3: Inventário — Em andamento
+### Épico 3: Inventário — Concluído
 
-- **Sprint 1 (atual):** motor de regras físicas, prevenção de duplicidade
+- **Sprint 1:** motor de regras físicas, prevenção de duplicidade
   semântica (Upsert/Merge) e CRUD básico.
 - **Sprint 2:** inserção otimizada em lote para grandes volumes de cartas
-  (estilo *Moxfield*).
+  (estilo *Moxfield*), incluindo consolidação de duplicidades e soma de
+  quantidades.
 - **Sprint 3:** sistema de agrupamento para que os usuários estruturem o seu
   inventário em Decks e *Binders*.
+
+Os três sprints do inventário foram finalizados, incluindo o CRUD individual,
+o bulk upsert e o fluxo de prévia para importação de coleções.
 
 ### Épico 4: Ofertas — Planejado
 
