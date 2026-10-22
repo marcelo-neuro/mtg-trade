@@ -33,7 +33,7 @@ class ScryfallParser {
         cartaCatalogoConvertida.setPrintId(cartaScryfallDto.id());
         cartaCatalogoConvertida.setNome(cartaScryfallDto.name());
         cartaCatalogoConvertida.setEdicao(cartaScryfallDto.setName());
-        cartaCatalogoConvertida.setSiglaEdicao(cartaScryfallDto.set());
+        cartaCatalogoConvertida.setSiglaEdicao(cartaScryfallDto.set().toUpperCase());
         cartaCatalogoConvertida.setNumeroColecionador(cartaScryfallDto.collectorNumber());
         cartaCatalogoConvertida.setIsPromo(cartaScryfallDto.promo());
 
@@ -50,6 +50,7 @@ class ScryfallParser {
         // Converte a entidade já criada para uma String que será utilizada para gerar o hash da carta, a fim de verificar se houve alteração na carta.
         String baseHash = (cartaCatalogoConvertida.getNome() != null ? cartaCatalogoConvertida.getNome() : "") + "|" +
                 (cartaCatalogoConvertida.getEdicao() != null ? cartaCatalogoConvertida.getEdicao() : "") + "|" +
+                (cartaCatalogoConvertida.getSiglaEdicao() != null ? cartaCatalogoConvertida.getSiglaEdicao() : "") + "|" +
                 (cartaCatalogoConvertida.getImagemFrenteUrl() != null ? cartaCatalogoConvertida.getImagemFrenteUrl() : "") + "|" +
                 (cartaCatalogoConvertida.getImagemVersoUrl() != null ? cartaCatalogoConvertida.getImagemVersoUrl() : "") + "|" +
                 (cartaCatalogoConvertida.getAcabamentos() != null ? cartaCatalogoConvertida.getAcabamentos() : "") + "|" +

@@ -96,7 +96,7 @@ public class CatalogoFacadeImpl implements CatalogoFacade {
 
         return cartasCatalogo
                 .stream().collect(Collectors.toMap(
-                        carta -> new ChaveBuscaCatalogoDTO(carta.getEdicao(), carta.getNumeroColecionador()),
+                        carta -> new ChaveBuscaCatalogoDTO(carta.getSiglaEdicao(), carta.getNumeroColecionador()),
                         cartaCatalogo -> new CartaCatalogoDTO(
                                 cartaCatalogo.getId().toString(),
                                 cartaCatalogo.getOracleId(),
