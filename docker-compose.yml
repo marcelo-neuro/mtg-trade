@@ -33,6 +33,20 @@ services:
       postgres-catalogo:
         condition: service_healthy
 
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: mtg-trade-gateway
+    env_file:
+      - .env
+    environment:
+      - MONOLITO_URL=http://monolito-mtg-trade-api:8080
+    ports:
+      - ${GATEWAY_PORT}:9000
+    depends_on:
+      - monolito-mtg-trade-api
+
 
 volumes:
   catalogo_data:
