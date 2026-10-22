@@ -26,7 +26,8 @@ public class CatalogoService {
                         cartaCatalogo.getTiposPromo(),
                         cartaCatalogo.getIsPromo(),
                         cartaCatalogo.getImagemFrenteUrl(),
-                        cartaCatalogo.getImagemVersoUrl()
+                        cartaCatalogo.getImagemVersoUrl(),
+                        cartaCatalogo.getNumeroColecionador()
                 ));
     }
 }
