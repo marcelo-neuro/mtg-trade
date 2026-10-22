@@ -38,6 +38,9 @@ public class CartaCatalogo {
     @Column(nullable = false)
     private String edicao;
 
+    @Column
+    private String siglaEdicao;
+
     @Column(name = "imagem_frente_url",nullable = false)
     private String imagemFrenteUrl;
 

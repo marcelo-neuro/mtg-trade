@@ -15,6 +15,8 @@ record CartaScryfallDTO(
         String name,
         @JsonProperty("set_name")
         String setName,
+        @JsonProperty("set")
+        String set,
         @JsonProperty("image_status")
         String imageStatus,
         @JsonProperty("layout")

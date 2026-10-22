@@ -33,6 +33,7 @@ class ScryfallParser {
         cartaCatalogoConvertida.setPrintId(cartaScryfallDto.id());
         cartaCatalogoConvertida.setNome(cartaScryfallDto.name());
         cartaCatalogoConvertida.setEdicao(cartaScryfallDto.setName());
+        cartaCatalogoConvertida.setSiglaEdicao(cartaScryfallDto.set());
         cartaCatalogoConvertida.setNumeroColecionador(cartaScryfallDto.collectorNumber());
         cartaCatalogoConvertida.setIsPromo(cartaScryfallDto.promo());
 
