@@ -2,6 +2,7 @@ package br.com.marceloneuro.mtgtrade.inventario.internal.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.UUID;
 
@@ -50,4 +51,10 @@ public class ItemInventario {
     @Column(name = "idioma", nullable = false, length = 10)
     @Enumerated(EnumType.STRING)
     private Idioma idioma;
+
+    // Esse campo é destinado a lockar a linha no banco de dados.
+    // Será utilizado na feature de ofertas.
+    @ColumnDefault("false")
+    @Column(name = "reservado", nullable = false)
+    private Boolean reservado;
 }
