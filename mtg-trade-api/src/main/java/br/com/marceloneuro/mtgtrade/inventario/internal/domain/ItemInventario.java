@@ -17,7 +17,7 @@ import java.util.UUID;
                 // Garante que o usuário não possua duas linhas para armazenar carta com mesma características
                 @UniqueConstraint(
                         name = "uk_inventario_estado_fisico",
-                        columnNames = {"usuario_id", "carta_catalogo_id", "acabamento", "tipo_promo", "estado", "idioma"}
+                        columnNames = {"usuario_id", "carta_catalogo_id", "acabamento", "tipo_promo", "estado", "idioma", "reservado"}
                 )
         }
 )
