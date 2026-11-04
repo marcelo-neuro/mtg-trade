@@ -12,6 +12,7 @@ public record ItemInventarioResponseDTO(
         Integer quantidade,
         String estado,
         String idioma,
+        Boolean reservado,
 
         // Atributos referentes às cartas do catálogo
         String cartaCatalogoId,
@@ -28,6 +29,7 @@ public record ItemInventarioResponseDTO(
                 entidade.getQuantidade(),
                 entidade.getEstado().toString(),
                 entidade.getIdioma().getDescricao(),
+                entidade.getReservado(),
 
                 cartaCatalogo.id(),
                 cartaCatalogo.nome(),
