@@ -10,8 +10,8 @@ import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Estado;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Idioma;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.ItemInventario;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.exception.ItemNaoEncontradoException;
+import br.com.marceloneuro.mtgtrade.inventario.internal.domain.exception.ItemReservadoException;
 import br.com.marceloneuro.mtgtrade.inventario.internal.infrastructure.ItemInventarioRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,6 +65,7 @@ public class ItemInventarioService {
             itemInventarioAdicionado.setIdioma(idiomaItem);
         }
 
+        itemInventarioAdicionado.setReservado(false);
         ItemInventario itemSalvo = itemInventarioRepository.save(itemInventarioAdicionado);
 
         return new ItemInventarioResponseDTO(itemSalvo, cartaCatalogo);
@@ -108,6 +109,10 @@ public class ItemInventarioService {
 
         ItemInventario itemOriginal = itemInventarioRepository.findByIdAndUsuarioId(uuidItem, uuidUsuario)
                 .orElseThrow(() -> new ItemNaoEncontradoException("Item não existente no inventário desse usuário."));
+
+        if (itemOriginal.getReservado()) {
+            throw new ItemReservadoException("Essa carta está reservada e não pode ser modificada ou excluída.");
+        }
 
         CartaCatalogoDTO cartaCatalogo = catalogoFacade.obterPorId(itemOriginal.getCartaCatalogoId());
 
@@ -154,6 +159,10 @@ public class ItemInventarioService {
     public void removerItem(String usuarioId, String itemId) {
         ItemInventario itemInventario = itemInventarioRepository.findByIdAndUsuarioId(UUID.fromString(itemId), UUID.fromString(usuarioId))
                 .orElseThrow(() -> new ItemNaoEncontradoException("Item não existente no inventário do usuário."));
+
+        if (itemInventario.getReservado()) {
+            throw new ItemReservadoException("Essa carta está reservada e não pode ser modificada ou excluída.");
+        }
 
         itemInventarioRepository.delete(itemInventario);
     }
