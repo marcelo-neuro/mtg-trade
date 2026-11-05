@@ -1,9 +1,12 @@
 package br.com.marceloneuro.mtgtrade.oferta.internal.domain;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Getter
 public enum EstadoMinimo {
     M(5, "Mint"),
     NM(4, "Near Mint"),
