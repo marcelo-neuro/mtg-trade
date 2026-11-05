@@ -18,6 +18,10 @@ public interface ItemInventarioRepository extends JpaRepository<ItemInventario, 
                                                                                       String acabamento, String promo,
                                                                                       Estado estado, Idioma idioma);
 
+    Optional<ItemInventario> findByUsuarioIdAndCartaCatalogoIdAndAcabamentoAndPromoAndEstadoAndIdiomaAndReservado(UUID usuarioId, UUID cartaCatalogoId,
+                                                                                                      String acabamento, String promo,
+                                                                                                      Estado estado, Idioma idioma, Boolean reservado);
+
     Optional<ItemInventario> findByIdAndUsuarioId(UUID id, UUID usuarioId);
 
     Page<ItemInventario> findByUsuarioId(UUID usuarioId, Pageable pageable);
