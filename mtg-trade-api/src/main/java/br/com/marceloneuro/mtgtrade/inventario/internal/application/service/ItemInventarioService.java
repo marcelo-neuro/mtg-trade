@@ -46,8 +46,8 @@ public class ItemInventarioService {
 
         // Busca para saber se a carta adicionada já está no inventário do usuário.
         Optional<ItemInventario> itemInventarioBuscado = itemInventarioRepository
-                .findByUsuarioIdAndCartaCatalogoIdAndAcabamentoAndPromoAndEstadoAndIdioma(uuidUsuario, uuidCartaCatalogo,
-                        request.acabamento(), request.promo(), estadoItem, idiomaItem);
+                .findByUsuarioIdAndCartaCatalogoIdAndAcabamentoAndPromoAndEstadoAndIdiomaAndReservado(uuidUsuario, uuidCartaCatalogo,
+                        request.acabamento(), request.promo(), estadoItem, idiomaItem, false);
 
         // Caso o item esteja presente adicionamos a quantidade que o usuário solicitou no AdicionarItemRequestDTO
         if (itemInventarioBuscado.isPresent()) {
@@ -124,8 +124,8 @@ public class ItemInventarioService {
 
         // Busca para saber se já existe um registro físico desse item.
         Optional<ItemInventario> destinoOpt = itemInventarioRepository
-                .findByUsuarioIdAndCartaCatalogoIdAndAcabamentoAndPromoAndEstadoAndIdioma(uuidUsuario, itemOriginal.getCartaCatalogoId(),
-                        request.acabamento(), request.promo(), estadoItem, idiomaItem);
+                .findByUsuarioIdAndCartaCatalogoIdAndAcabamentoAndPromoAndEstadoAndIdiomaAndReservado(uuidUsuario, itemOriginal.getCartaCatalogoId(),
+                        request.acabamento(), request.promo(), estadoItem, idiomaItem, false);
 
         ItemInventario itemSalvo;
         // Caso o item exista nós verificamos se eles não são o mesmo registro (ID)
