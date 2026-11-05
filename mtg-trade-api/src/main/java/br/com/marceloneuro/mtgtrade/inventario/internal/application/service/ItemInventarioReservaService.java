@@ -26,7 +26,6 @@ public class ItemInventarioReservaService {
     private final ItemInventarioRepository itemInventarioRepository;
     private final CatalogoFacade catalogoFacade;
 
-
     @Transactional
     public ItemInventarioResponseDTO reservarItem(PedidoReservaDTO pedidoReserva, String idUsuario) {
         UUID uuidCarta = UUID.fromString(pedidoReserva.itemInventarioUUID());
@@ -47,42 +46,7 @@ public class ItemInventarioReservaService {
 
         CartaCatalogoDTO detalhesCarta = catalogoFacade.obterPorId(itemOriginal.getCartaCatalogoId());
 
-        Optional<ItemInventario> itemDestinoOpt = itemInventarioRepository
-                .findByUsuarioIdAndCartaCatalogoIdAndAcabamentoAndPromoAndEstadoAndIdiomaAndReservado(uuidUsuario, itemOriginal.getCartaCatalogoId(),
-                        itemOriginal.getAcabamento(), itemOriginal.getPromo(), itemOriginal.getEstado(), itemOriginal.getIdioma(), true);
-
-        ItemInventario itemSalvo;
-
-
-        if (itemDestinoOpt.isPresent()) {
-            ItemInventario destino = itemDestinoOpt.get();
-
-            itemOriginal.setQuantidade(itemOriginal.getQuantidade() - pedidoReserva.quantidade());
-            destino.setQuantidade(destino.getQuantidade() + pedidoReserva.quantidade());
-            itemSalvo = destino;
-        } else {
-            itemOriginal.setQuantidade(itemOriginal.getQuantidade() - pedidoReserva.quantidade());
-
-            itemSalvo = new ItemInventario();
-            itemSalvo.setUsuarioId(itemOriginal.getUsuarioId());
-            itemSalvo.setCartaCatalogoId(itemOriginal.getCartaCatalogoId());
-            itemSalvo.setAcabamento(itemOriginal.getAcabamento());
-            itemSalvo.setPromo(itemOriginal.getPromo());
-            itemSalvo.setEstado(itemOriginal.getEstado());
-            itemSalvo.setIdioma(itemOriginal.getIdioma());
-            itemSalvo.setQuantidade(pedidoReserva.quantidade());
-            itemSalvo.setReservado(true);
-        }
-
-        // Caso a quantidade reservada seja igual à quantidade total, excluímos o registro original
-        if (Integer.valueOf(0).equals(itemOriginal.getQuantidade())) {
-            itemInventarioRepository.delete(itemOriginal);
-        } else {
-        // Caso a quantidade seja menor atualizamos o registro original.
-            itemInventarioRepository.save(itemOriginal);
-        }
-
-        itemSalvo = itemInventarioRepository.save(itemSalvo);
+        ItemInventario itemSalvo = transferirSaldo(itemOriginal, pedidoReserva.quantidade(),  true, uuidUsuario);
 
         return new ItemInventarioResponseDTO(itemSalvo, detalhesCarta);
     }
@@ -107,30 +71,36 @@ public class ItemInventarioReservaService {
 
         CartaCatalogoDTO detalhesCarta = catalogoFacade.obterPorId(itemOriginal.getCartaCatalogoId());
 
+        ItemInventario itemSalvo = transferirSaldo(itemOriginal, pedidoLiberacao.quantidade(), false, uuidUsuario);
+
+        return new ItemInventarioResponseDTO(itemSalvo, detalhesCarta);
+    }
+
+    private ItemInventario transferirSaldo(ItemInventario itemOriginal, Integer quantidade, Boolean destinoReserva, UUID uuidUsuario) {
+
         Optional<ItemInventario> itemDestinoOpt = itemInventarioRepository
                 .findByUsuarioIdAndCartaCatalogoIdAndAcabamentoAndPromoAndEstadoAndIdiomaAndReservado(uuidUsuario, itemOriginal.getCartaCatalogoId(),
-                        itemOriginal.getAcabamento(), itemOriginal.getPromo(), itemOriginal.getEstado(), itemOriginal.getIdioma(), false);
+                        itemOriginal.getAcabamento(), itemOriginal.getPromo(), itemOriginal.getEstado(), itemOriginal.getIdioma(), destinoReserva);
 
-        ItemInventario itemSalvo;
+        ItemInventario itemDestino;
 
         if (itemDestinoOpt.isPresent()) {
-            ItemInventario destino = itemDestinoOpt.get();
+            itemDestino = itemDestinoOpt.get();
 
-            itemOriginal.setQuantidade(itemOriginal.getQuantidade() - pedidoLiberacao.quantidade());
-            destino.setQuantidade(destino.getQuantidade() + pedidoLiberacao.quantidade());
-            itemSalvo = destino;
+            itemOriginal.setQuantidade(itemOriginal.getQuantidade() - quantidade);
+            itemDestino.setQuantidade(itemDestino.getQuantidade() + quantidade);
         } else {
-            itemOriginal.setQuantidade(itemOriginal.getQuantidade() - pedidoLiberacao.quantidade());
+            itemOriginal.setQuantidade(itemOriginal.getQuantidade() - quantidade);
 
-            itemSalvo = new ItemInventario();
-            itemSalvo.setUsuarioId(itemOriginal.getUsuarioId());
-            itemSalvo.setCartaCatalogoId(itemOriginal.getCartaCatalogoId());
-            itemSalvo.setAcabamento(itemOriginal.getAcabamento());
-            itemSalvo.setPromo(itemOriginal.getPromo());
-            itemSalvo.setEstado(itemOriginal.getEstado());
-            itemSalvo.setIdioma(itemOriginal.getIdioma());
-            itemSalvo.setQuantidade(pedidoLiberacao.quantidade());
-            itemSalvo.setReservado(false);
+            itemDestino = new ItemInventario();
+            itemDestino.setUsuarioId(itemOriginal.getUsuarioId());
+            itemDestino.setCartaCatalogoId(itemOriginal.getCartaCatalogoId());
+            itemDestino.setAcabamento(itemOriginal.getAcabamento());
+            itemDestino.setPromo(itemOriginal.getPromo());
+            itemDestino.setEstado(itemOriginal.getEstado());
+            itemDestino.setIdioma(itemOriginal.getIdioma());
+            itemDestino.setQuantidade(quantidade);
+            itemDestino.setReservado(destinoReserva);
         }
 
         // Caso a quantidade reservada seja igual à quantidade total, excluímos o registro original
@@ -141,8 +111,6 @@ public class ItemInventarioReservaService {
             itemInventarioRepository.save(itemOriginal);
         }
 
-        itemSalvo = itemInventarioRepository.save(itemSalvo);
-
-        return new ItemInventarioResponseDTO(itemSalvo, detalhesCarta);
+        return itemInventarioRepository.save(itemDestino);
     }
 }
