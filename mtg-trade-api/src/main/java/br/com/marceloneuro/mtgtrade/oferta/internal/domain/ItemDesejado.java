@@ -13,6 +13,8 @@ import java.util.UUID;
 @EqualsAndHashCode(of = "id")
 @Table(name = "item_desejado")
 @Entity
+// Essa entidade representa um item desejado de uma oferta no banco de dados.
+// É parte de um relacionamento, pois tanto a entidade ItemDesejado quando Oferta pertencem ao mesmo domínio.
 public class ItemDesejado {
 
     @Id
