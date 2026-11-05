@@ -10,7 +10,7 @@ import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Estado;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Idioma;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.ItemInventario;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.exception.ItemNaoEncontradoException;
-import br.com.marceloneuro.mtgtrade.inventario.internal.domain.exception.ItemReservadoException;
+import br.com.marceloneuro.mtgtrade.inventario.internal.domain.exception.ReservaItemException;
 import br.com.marceloneuro.mtgtrade.inventario.internal.infrastructure.ItemInventarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -111,7 +111,7 @@ public class ItemInventarioService {
                 .orElseThrow(() -> new ItemNaoEncontradoException("Item não existente no inventário desse usuário."));
 
         if (itemOriginal.getReservado()) {
-            throw new ItemReservadoException("Essa carta está reservada e não pode ser modificada ou excluída.");
+            throw new ReservaItemException("Essa carta está reservada e não pode ser modificada ou excluída.");
         }
 
         CartaCatalogoDTO cartaCatalogo = catalogoFacade.obterPorId(itemOriginal.getCartaCatalogoId());
@@ -161,7 +161,7 @@ public class ItemInventarioService {
                 .orElseThrow(() -> new ItemNaoEncontradoException("Item não existente no inventário do usuário."));
 
         if (itemInventario.getReservado()) {
-            throw new ItemReservadoException("Essa carta está reservada e não pode ser modificada ou excluída.");
+            throw new ReservaItemException("Essa carta está reservada e não pode ser modificada ou excluída.");
         }
 
         itemInventarioRepository.delete(itemInventario);
