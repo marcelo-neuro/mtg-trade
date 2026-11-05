@@ -10,8 +10,8 @@ import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Estado;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Idioma;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.ItemInventario;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.exception.ItemNaoEncontradoException;
+import br.com.marceloneuro.mtgtrade.inventario.internal.domain.exception.ReservaItemException;
 import br.com.marceloneuro.mtgtrade.inventario.internal.infrastructure.ItemInventarioRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,8 +46,8 @@ public class ItemInventarioService {
 
         // Busca para saber se a carta adicionada já está no inventário do usuário.
         Optional<ItemInventario> itemInventarioBuscado = itemInventarioRepository
-                .findByUsuarioIdAndCartaCatalogoIdAndAcabamentoAndPromoAndEstadoAndIdioma(uuidUsuario, uuidCartaCatalogo,
-                        request.acabamento(), request.promo(), estadoItem, idiomaItem);
+                .findByUsuarioIdAndCartaCatalogoIdAndAcabamentoAndPromoAndEstadoAndIdiomaAndReservado(uuidUsuario, uuidCartaCatalogo,
+                        request.acabamento(), request.promo(), estadoItem, idiomaItem, false);
 
         // Caso o item esteja presente adicionamos a quantidade que o usuário solicitou no AdicionarItemRequestDTO
         if (itemInventarioBuscado.isPresent()) {
@@ -65,6 +65,7 @@ public class ItemInventarioService {
             itemInventarioAdicionado.setIdioma(idiomaItem);
         }
 
+        itemInventarioAdicionado.setReservado(false);
         ItemInventario itemSalvo = itemInventarioRepository.save(itemInventarioAdicionado);
 
         return new ItemInventarioResponseDTO(itemSalvo, cartaCatalogo);
@@ -109,6 +110,10 @@ public class ItemInventarioService {
         ItemInventario itemOriginal = itemInventarioRepository.findByIdAndUsuarioId(uuidItem, uuidUsuario)
                 .orElseThrow(() -> new ItemNaoEncontradoException("Item não existente no inventário desse usuário."));
 
+        if (itemOriginal.getReservado()) {
+            throw new ReservaItemException("Essa carta está reservada e não pode ser modificada ou excluída.");
+        }
+
         CartaCatalogoDTO cartaCatalogo = catalogoFacade.obterPorId(itemOriginal.getCartaCatalogoId());
 
         validadores.forEach(validador -> validador.validar(request, cartaCatalogo));
@@ -119,8 +124,8 @@ public class ItemInventarioService {
 
         // Busca para saber se já existe um registro físico desse item.
         Optional<ItemInventario> destinoOpt = itemInventarioRepository
-                .findByUsuarioIdAndCartaCatalogoIdAndAcabamentoAndPromoAndEstadoAndIdioma(uuidUsuario, itemOriginal.getCartaCatalogoId(),
-                        request.acabamento(), request.promo(), estadoItem, idiomaItem);
+                .findByUsuarioIdAndCartaCatalogoIdAndAcabamentoAndPromoAndEstadoAndIdiomaAndReservado(uuidUsuario, itemOriginal.getCartaCatalogoId(),
+                        request.acabamento(), request.promo(), estadoItem, idiomaItem, false);
 
         ItemInventario itemSalvo;
         // Caso o item exista nós verificamos se eles não são o mesmo registro (ID)
@@ -154,6 +159,10 @@ public class ItemInventarioService {
     public void removerItem(String usuarioId, String itemId) {
         ItemInventario itemInventario = itemInventarioRepository.findByIdAndUsuarioId(UUID.fromString(itemId), UUID.fromString(usuarioId))
                 .orElseThrow(() -> new ItemNaoEncontradoException("Item não existente no inventário do usuário."));
+
+        if (itemInventario.getReservado()) {
+            throw new ReservaItemException("Essa carta está reservada e não pode ser modificada ou excluída.");
+        }
 
         itemInventarioRepository.delete(itemInventario);
     }
