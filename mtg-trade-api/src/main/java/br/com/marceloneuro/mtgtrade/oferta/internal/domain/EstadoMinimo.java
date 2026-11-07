@@ -1,0 +1,33 @@
+package br.com.marceloneuro.mtgtrade.oferta.internal.domain;
+
+import lombok.Getter;
+
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Getter
+public enum EstadoMinimo {
+    M(5, "Mint"),
+    NM(4, "Near Mint"),
+    SP(3, "Slightly Played"),
+    MP(2, "Moderately Played"),
+    HP(1, "Heavily Played"),
+    DM(0, "Damaged");
+
+    private final static Set<String> VALORES_VALIDOS = Arrays.stream(values())
+            .map(Enum::name)
+            .collect(Collectors.toSet());
+
+    private int peso;
+    private String descricao;
+
+    EstadoMinimo (int peso, String descricao) {
+        this.peso = peso;
+        this.descricao = descricao;
+    }
+
+    public static boolean isValido(String valor) {
+        return valor != null && VALORES_VALIDOS.contains(valor.toUpperCase());
+    }
+}
