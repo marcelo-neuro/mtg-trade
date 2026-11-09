@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,7 +31,7 @@ public class Oferta {
     private UUID itemOferecido;
 
     @OneToMany(mappedBy = "oferta", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ItemDesejado> itensDesejados;
+    private List<ItemDesejado> itensDesejados = new ArrayList<>();
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
