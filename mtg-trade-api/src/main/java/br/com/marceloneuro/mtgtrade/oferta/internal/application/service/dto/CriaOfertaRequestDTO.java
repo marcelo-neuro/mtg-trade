@@ -12,6 +12,9 @@ public record CriaOfertaRequestDTO(
         @NotBlank(message = "O ID do item oferecido é obrigatório.")
         String itemInventarioOfertadoId,
 
+        @Min(value = 1, message = "A quantidade deve ser maior que 0.")
+        Integer quantidade,
+
         @NotEmpty(message = "A oferta deve conter pelo menos um item desejado em troca.")
         List<@Valid ItemDesejadoRequestDTO> itensDesejados
 ) {
