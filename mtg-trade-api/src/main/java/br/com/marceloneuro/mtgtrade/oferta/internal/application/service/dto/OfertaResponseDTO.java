@@ -9,7 +9,7 @@ public record OfertaResponseDTO(
     String id,
     String usuarioId,
     StatusOferta statusOferta,
-    Instant criadaEm,
+    Instant ultimaModificacao,
     ItemOferecidoResponseDTO itemOferecido,
     List<ItemDesejadoResponseDTO> itensDesejados
 ) {
@@ -17,27 +17,27 @@ public record OfertaResponseDTO(
     public record ItemOferecidoResponseDTO(
             String itemInventarioId,
             String cartaCatalogoId,
-            String nomeCarta,
-            String urlImagem,
-            String siglaSet,
-            String numeroColecionador,
             String idioma,
             String estado,
             String acabamento,
-            String promo
+            String promo,
+            String nomeCarta,
+            String urlImagem,
+            String siglaSet,
+            String numeroColecionador
     ) {}
 
     public record ItemDesejadoResponseDTO(
             String id,
             String cartaCatalogoId,
-            String nomeCarta,
-            String urlImagem,
-            String siglaSet,
-            String numeroColecionador,
-            Integer quantidade,
             List<String> acabamentosAceitos,
             List<String> promosAceitas,
             List<String> idiomasAceitos,
-            String estadoMinimo
+            Integer quantidade,
+            String estadoMinimo,
+            String nomeCarta,
+            String urlImagem,
+            String siglaSet,
+            String numeroColecionador
     ) {}
 }
