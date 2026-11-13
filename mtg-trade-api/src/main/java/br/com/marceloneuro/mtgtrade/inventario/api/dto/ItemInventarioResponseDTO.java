@@ -1,4 +1,4 @@
-package br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto;
+package br.com.marceloneuro.mtgtrade.inventario.api.dto;
 
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.ItemInventario;

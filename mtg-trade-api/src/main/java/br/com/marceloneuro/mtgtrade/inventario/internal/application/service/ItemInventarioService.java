@@ -2,9 +2,9 @@ package br.com.marceloneuro.mtgtrade.inventario.internal.application.service;
 
 import br.com.marceloneuro.mtgtrade.catalogo.api.CatalogoFacade;
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
-import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.AdicionarItemRequestDTO;
-import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.AtualizarItemRequestDTO;
-import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.ItemInventarioResponseDTO;
+import br.com.marceloneuro.mtgtrade.inventario.api.dto.AdicionarItemRequestDTO;
+import br.com.marceloneuro.mtgtrade.inventario.api.dto.AtualizarItemRequestDTO;
+import br.com.marceloneuro.mtgtrade.inventario.api.dto.ItemInventarioResponseDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.validation.ValidadorItemInventario;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Estado;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.Idioma;

@@ -1,4 +1,4 @@
-package br.com.marceloneuro.mtgtrade.oferta.internal.application.service.dto;
+package br.com.marceloneuro.mtgtrade.oferta.api.dto;
 
 import br.com.marceloneuro.mtgtrade.oferta.internal.domain.StatusOferta;
 

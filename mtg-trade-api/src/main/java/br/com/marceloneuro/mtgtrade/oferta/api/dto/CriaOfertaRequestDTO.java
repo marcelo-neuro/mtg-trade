@@ -1,4 +1,4 @@
-package br.com.marceloneuro.mtgtrade.oferta.internal.application.service.dto;
+package br.com.marceloneuro.mtgtrade.oferta.api.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;

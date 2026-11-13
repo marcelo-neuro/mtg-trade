@@ -1,7 +1,7 @@
 package br.com.marceloneuro.mtgtrade.iam.internal.application.service;
 
-import br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto.LoginRequestDTO;
-import br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto.TokenDTO;
+import br.com.marceloneuro.mtgtrade.iam.api.dto.LoginRequestDTO;
+import br.com.marceloneuro.mtgtrade.iam.api.dto.TokenDTO;
 import br.com.marceloneuro.mtgtrade.iam.internal.domain.exception.FalhaNoLoginException;
 import br.com.marceloneuro.mtgtrade.iam.internal.infrastructure.security.ImplUserDetails;
 import br.com.marceloneuro.mtgtrade.iam.internal.infrastructure.security.TokenService;

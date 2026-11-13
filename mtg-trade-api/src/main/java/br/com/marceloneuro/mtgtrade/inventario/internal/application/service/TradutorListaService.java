@@ -3,8 +3,8 @@ package br.com.marceloneuro.mtgtrade.inventario.internal.application.service;
 import br.com.marceloneuro.mtgtrade.catalogo.api.CatalogoFacade;
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.ChaveBuscaCatalogoDTO;
-import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.ListaImportacaoRequestDTO;
-import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.PreviaImportacaoItemResponseDTO;
+import br.com.marceloneuro.mtgtrade.inventario.api.dto.ListaImportacaoRequestDTO;
+import br.com.marceloneuro.mtgtrade.inventario.api.dto.PreviaImportacaoItemResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

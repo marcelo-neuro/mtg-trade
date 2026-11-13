@@ -1,7 +1,7 @@
 package br.com.marceloneuro.mtgtrade.iam.internal.application.service;
 
-import br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto.RegistroUsuarioRequestDTO;
-import br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto.RegistroUsuarioResponseDTO;
+import br.com.marceloneuro.mtgtrade.iam.api.dto.RegistroUsuarioRequestDTO;
+import br.com.marceloneuro.mtgtrade.iam.api.dto.RegistroUsuarioResponseDTO;
 import br.com.marceloneuro.mtgtrade.iam.internal.domain.exception.UniqueNomeUsuarioEmailException;
 import br.com.marceloneuro.mtgtrade.iam.internal.domain.Usuario;
 import br.com.marceloneuro.mtgtrade.iam.internal.infrastructure.UsuarioRepository;
