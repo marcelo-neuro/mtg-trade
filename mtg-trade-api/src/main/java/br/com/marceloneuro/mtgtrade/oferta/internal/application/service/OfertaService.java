@@ -45,44 +45,54 @@ public class OfertaService {
         oferta.setStatus(StatusOferta.ATIVA);
         oferta.setUltimaModificacao(Instant.now());
 
-        request.itensDesejados().forEach(
-                itemDesejadoRequest -> {
-                    ItemDesejado itemDesejado = new ItemDesejado();
-                    itemDesejado.setCartaCatalogoId(UUID.fromString(itemDesejadoRequest.cartaCatalogoId()));
-                    itemDesejado.setOferta(oferta);
-                    itemDesejado.setQuantidade(itemDesejadoRequest.quantidade());
-                    itemDesejado.setEstadoMinimo(EstadoMinimo.valueOf(itemDesejadoRequest.estadoMinimo()));
-
-                    StringJoiner joinerAcabamento = new StringJoiner(",");
-                    itemDesejadoRequest.acabamentosAceitos().forEach(joinerAcabamento::add);
-                    itemDesejado.setAcabamentos(joinerAcabamento.toString());
-
-                    StringJoiner joinerPromo = new StringJoiner(",");
-                    itemDesejadoRequest.promosAceitas().forEach(joinerPromo::add);
-                    itemDesejado.setTiposPromo(joinerPromo.toString());
-
-                    StringJoiner joinerIdioma = new StringJoiner(",");
-                    itemDesejadoRequest.idiomasAceitos().forEach(joinerPromo::add);
-                    itemDesejado.setIdiomasDesejados(joinerPromo.toString());
-
-                    oferta.getItensDesejados().add(itemDesejado);
-                }
-        );
+        mapeiaListaItensDesejados(oferta, request.itensDesejados());
 
         Oferta ofertaSalva = ofertaRepository.save(oferta);
 
         ItemInventarioDTO itemOferecido = inventarioFacade
                 .buscaPorIdEUsuarioId(request.itemInventarioOfertadoId(), usuarioId);
 
-        Set<UUID> setCartaCatalogoId = new HashSet<>();
+        Set<UUID> setCartaCatalogoId = mapeiaSetCartaCatalogoUuid(ofertaSalva);
         setCartaCatalogoId.add(UUID.fromString(itemOferecido.cartaCatalogoId()));
-        oferta.getItensDesejados()
-                .forEach(itemDesejado -> setCartaCatalogoId.add(itemDesejado.getCartaCatalogoId()));
 
         Map<UUID, CartaCatalogoDTO> detalhesCartaMap = catalogoFacade.buscaPorConjuntoIdsMap(setCartaCatalogoId);
 
+        List<OfertaResponseDTO.ItemDesejadoResponseDTO> itensDesejadosResponse =
+                mapeiaListaItensDesejadosResponse(ofertaSalva, detalhesCartaMap);
+
+        CartaCatalogoDTO detalhesItemOferecido = detalhesCartaMap.get(UUID.fromString(itemOferecido.cartaCatalogoId()));
+        return mapeiaOfertaResponseDTO(ofertaSalva, itemOferecido, detalhesItemOferecido, itensDesejadosResponse);
+    }
+
+    private OfertaResponseDTO mapeiaOfertaResponseDTO(Oferta entidade,
+                                                      ItemInventarioDTO itemOferecidoDTO,
+                                                      CartaCatalogoDTO detalhesItemOferecido,
+                                                      List<OfertaResponseDTO.ItemDesejadoResponseDTO> itensDesejadosResponse) {
+        return new OfertaResponseDTO(
+                entidade.getId().toString(),
+                entidade.getUsuarioId().toString(),
+                entidade.getStatus(),
+                entidade.getUltimaModificacao(),
+                new OfertaResponseDTO.ItemOferecidoResponseDTO(
+                        itemOferecidoDTO.id(),
+                        itemOferecidoDTO.cartaCatalogoId(),
+                        itemOferecidoDTO.idioma(),
+                        itemOferecidoDTO.estado(),
+                        itemOferecidoDTO.acabamento(),
+                        itemOferecidoDTO.promo(),
+                        detalhesItemOferecido.nome(),
+                        detalhesItemOferecido.imagemFrenteUrl(),
+                        detalhesItemOferecido.siglaEdicao(),
+                        detalhesItemOferecido.numeroColecionador()
+                ),
+                itensDesejadosResponse
+        );
+    }
+
+    private List<OfertaResponseDTO.ItemDesejadoResponseDTO> mapeiaListaItensDesejadosResponse(Oferta entidade,
+                                                                                              Map<UUID, CartaCatalogoDTO> detalhesCartaMap) {
         List<OfertaResponseDTO.ItemDesejadoResponseDTO> itensDesejadosResponse = new ArrayList<>();
-        ofertaSalva.getItensDesejados()
+        entidade.getItensDesejados()
                 .forEach(itemDesejado -> {
 
                     CartaCatalogoDTO detalheItemDesejado = detalhesCartaMap.get(itemDesejado.getCartaCatalogoId());
@@ -101,26 +111,53 @@ public class OfertaService {
                     ));
                 });
 
-        CartaCatalogoDTO detalhesItemOferecido = detalhesCartaMap.get(UUID.fromString(itemOferecido.cartaCatalogoId()));
-        return new OfertaResponseDTO(
-                ofertaSalva.getId().toString(),
-                ofertaSalva.getUsuarioId().toString(),
-                ofertaSalva.getStatus(),
-                ofertaSalva.getUltimaModificacao(),
-                new OfertaResponseDTO.ItemOferecidoResponseDTO(
-                        itemOferecido.id(),
-                        itemOferecido.cartaCatalogoId(),
-                        itemOferecido.idioma(),
-                        itemOferecido.estado(),
-                        itemOferecido.acabamento(),
-                        itemOferecido.promo(),
-                        detalhesItemOferecido.nome(),
-                        detalhesItemOferecido.imagemFrenteUrl(),
-                        detalhesItemOferecido.siglaEdicao(),
-                        detalhesItemOferecido.numeroColecionador()
-                ),
-                itensDesejadosResponse
-        );
+        return itensDesejadosResponse;
+    }
 
+    private Set<UUID> mapeiaSetCartaCatalogoUuid(Oferta entidade) {
+        Set<UUID> setCartaCatalogoId = new HashSet<>();
+        entidade.getItensDesejados()
+                .forEach(itemDesejado -> setCartaCatalogoId.add(itemDesejado.getCartaCatalogoId()));
+
+        return setCartaCatalogoId;
+    }
+
+    private void mapeiaListaItensDesejados(Oferta entidade,
+                                           List<CriaOfertaRequestDTO.ItemDesejadoRequestDTO> itensDesejadosDTO) {
+        itensDesejadosDTO.forEach(
+                itemDesejadoRequest -> {
+                    ItemDesejado itemDesejado = new ItemDesejado();
+                    itemDesejado.setCartaCatalogoId(UUID.fromString(itemDesejadoRequest.cartaCatalogoId()));
+                    itemDesejado.setOferta(entidade);
+                    itemDesejado.setQuantidade(itemDesejadoRequest.quantidade());
+                    itemDesejado.setEstadoMinimo(EstadoMinimo.valueOf(itemDesejadoRequest.estadoMinimo()));
+
+                    if (itemDesejadoRequest.acabamentosAceitos() == null) {
+                        itemDesejado.setAcabamentos("");
+                    } else {
+                        StringJoiner joinerAcabamento = new StringJoiner(",");
+                        itemDesejadoRequest.acabamentosAceitos().forEach(joinerAcabamento::add);
+                        itemDesejado.setAcabamentos(joinerAcabamento.toString());
+                    }
+
+                    if (itemDesejadoRequest.promosAceitas() == null) {
+                        itemDesejado.setTiposPromo("");
+                    } else {
+                        StringJoiner joinerPromo = new StringJoiner(",");
+                        itemDesejadoRequest.promosAceitas().forEach(joinerPromo::add);
+                        itemDesejado.setTiposPromo(joinerPromo.toString());
+                    }
+
+                    if (itemDesejadoRequest.idiomasAceitos() == null) {
+                        itemDesejado.setIdiomasDesejados("");
+                    } else {
+                        StringJoiner joinerIdioma = new StringJoiner(",");
+                        itemDesejadoRequest.idiomasAceitos().forEach(joinerIdioma::add);
+                        itemDesejado.setIdiomasDesejados(joinerIdioma.toString());
+                    }
+
+                    entidade.getItensDesejados().add(itemDesejado);
+                }
+        );
     }
 }
