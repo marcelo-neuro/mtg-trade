@@ -11,6 +11,7 @@ import br.com.marceloneuro.mtgtrade.oferta.internal.domain.EstadoMinimo;
 import br.com.marceloneuro.mtgtrade.oferta.internal.domain.ItemDesejado;
 import br.com.marceloneuro.mtgtrade.oferta.internal.domain.Oferta;
 import br.com.marceloneuro.mtgtrade.oferta.internal.domain.StatusOferta;
+import br.com.marceloneuro.mtgtrade.oferta.internal.domain.exception.OfertaNaoEncontradaException;
 import br.com.marceloneuro.mtgtrade.oferta.internal.infrastructure.repository.OfertaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -49,19 +50,7 @@ public class OfertaService {
 
         Oferta ofertaSalva = ofertaRepository.save(oferta);
 
-        ItemInventarioDTO itemOferecido = inventarioFacade
-                .buscaPorIdEUsuarioId(request.itemInventarioOfertadoId(), usuarioId);
-
-        Set<UUID> setCartaCatalogoId = mapeiaSetCartaCatalogoUuid(ofertaSalva);
-        setCartaCatalogoId.add(UUID.fromString(itemOferecido.cartaCatalogoId()));
-
-        Map<UUID, CartaCatalogoDTO> detalhesCartaMap = catalogoFacade.buscaPorConjuntoIdsMap(setCartaCatalogoId);
-
-        List<OfertaResponseDTO.ItemDesejadoResponseDTO> itensDesejadosResponse =
-                mapeiaListaItensDesejadosResponse(ofertaSalva, detalhesCartaMap);
-
-        CartaCatalogoDTO detalhesItemOferecido = detalhesCartaMap.get(UUID.fromString(itemOferecido.cartaCatalogoId()));
-        return mapeiaOfertaResponseDTO(ofertaSalva, itemOferecido, detalhesItemOferecido, itensDesejadosResponse);
+        return montaOfertaResponseDTO(ofertaSalva);
     }
 
     private OfertaResponseDTO mapeiaOfertaResponseDTO(Oferta entidade,
@@ -159,5 +148,21 @@ public class OfertaService {
                     entidade.getItensDesejados().add(itemDesejado);
                 }
         );
+    }
+
+    private OfertaResponseDTO montaOfertaResponseDTO(Oferta entidade) {
+        ItemInventarioDTO itemOferecido = inventarioFacade
+                .buscaPorIdEUsuarioId(entidade.getId().toString(), entidade.getUsuarioId().toString());
+
+        Set<UUID> setCartaCatalogoId = mapeiaSetCartaCatalogoUuid(entidade);
+        setCartaCatalogoId.add(UUID.fromString(itemOferecido.cartaCatalogoId()));
+
+        Map<UUID, CartaCatalogoDTO> detalhesCartaMap = catalogoFacade.buscaPorConjuntoIdsMap(setCartaCatalogoId);
+
+        List<OfertaResponseDTO.ItemDesejadoResponseDTO> itensDesejadosResponse =
+                mapeiaListaItensDesejadosResponse(entidade, detalhesCartaMap);
+
+        CartaCatalogoDTO detalhesItemOferecido = detalhesCartaMap.get(UUID.fromString(itemOferecido.cartaCatalogoId()));
+        return mapeiaOfertaResponseDTO(entidade, itemOferecido, detalhesItemOferecido, itensDesejadosResponse);
     }
 }
