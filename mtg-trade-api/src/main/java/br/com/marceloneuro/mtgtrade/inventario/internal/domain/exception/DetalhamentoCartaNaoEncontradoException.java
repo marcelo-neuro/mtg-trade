@@ -4,7 +4,7 @@ import br.com.marceloneuro.mtgtrade.shared.exception.DominioException;
 import br.com.marceloneuro.mtgtrade.shared.exception.TipoErroDominio;
 
 public class DetalhamentoCartaNaoEncontradoException extends DominioException {
-    public DetalhamentoCartaNaoEncontradoException(String message, String titulo, String codigo, TipoErroDominio erroDominio) {
+    public DetalhamentoCartaNaoEncontradoException(String message) {
         super(
                 message,
                 "Detalhamento da Carta Não Encontrado",
