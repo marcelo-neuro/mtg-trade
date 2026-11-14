@@ -11,6 +11,7 @@ import br.com.marceloneuro.mtgtrade.oferta.internal.domain.EstadoMinimo;
 import br.com.marceloneuro.mtgtrade.oferta.internal.domain.ItemDesejado;
 import br.com.marceloneuro.mtgtrade.oferta.internal.domain.Oferta;
 import br.com.marceloneuro.mtgtrade.oferta.internal.domain.StatusOferta;
+import br.com.marceloneuro.mtgtrade.oferta.internal.domain.exception.DetalhesItemDesejadoNaoEncontradoException;
 import br.com.marceloneuro.mtgtrade.oferta.internal.domain.exception.OfertaNaoEncontradaException;
 import br.com.marceloneuro.mtgtrade.oferta.internal.infrastructure.repository.OfertaRepository;
 import lombok.RequiredArgsConstructor;
@@ -92,6 +93,11 @@ public class OfertaService {
         List<OfertaResponseDTO.ItemDesejadoResponseDTO> itensDesejadosResponse = new ArrayList<>();
         entidade.getItensDesejados()
                 .forEach(itemDesejado -> {
+                    if (!detalhesCartaMap.containsKey(itemDesejado.getCartaCatalogoId())) {
+                        throw new DetalhesItemDesejadoNaoEncontradoException(
+                                "Detalhe do item desejado não encontrado. ID: " + itemDesejado.getIdiomasDesejados()
+                        );
+                    }
 
                     CartaCatalogoDTO detalheItemDesejado = detalhesCartaMap.get(itemDesejado.getCartaCatalogoId());
                     itensDesejadosResponse.add(new OfertaResponseDTO.ItemDesejadoResponseDTO(
