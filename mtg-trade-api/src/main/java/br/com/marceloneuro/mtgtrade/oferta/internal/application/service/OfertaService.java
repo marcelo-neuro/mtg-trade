@@ -161,7 +161,7 @@ public class OfertaService {
 
     private OfertaResponseDTO montaOfertaResponseDTO(Oferta entidade) {
         ItemInventarioDTO itemOferecido = inventarioFacade
-                .buscaPorIdEUsuarioId(entidade.getId().toString(), entidade.getUsuarioId().toString());
+                .buscaPorIdEUsuarioId(entidade.getItemOferecido().toString(), entidade.getUsuarioId().toString());
 
         Set<UUID> setCartaCatalogoId = mapeiaSetCartaCatalogoUuid(entidade);
         setCartaCatalogoId.add(UUID.fromString(itemOferecido.cartaCatalogoId()));
