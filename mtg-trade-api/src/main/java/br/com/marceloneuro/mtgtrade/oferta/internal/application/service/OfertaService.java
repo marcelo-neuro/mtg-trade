@@ -63,6 +63,24 @@ public class OfertaService {
         return montaOfertaResponseDTO(oferta);
     }
 
+    // Retiramos as cartas oferecidas da reserva e modificamos o status de uma oferta para CANCELADA
+    @Transactional
+    public OfertaResponseDTO cancelarOferta(String ofertaId, String usuarioId) {
+        Oferta oferta = ofertaRepository
+                .findByIdAndUsuarioIdAndStatus(UUID.fromString(ofertaId), UUID.fromString(usuarioId), StatusOferta.ATIVA)
+                .orElseThrow(() -> new OfertaNaoEncontradaException("Oferta ativa não encontrada na conta do usuário."));
+
+        inventarioFacade
+                .liberarItem(new PedidoReservaDTO(oferta.getItemOferecido().toString(), oferta.getQuantidade()), usuarioId);
+
+        oferta.setStatus(StatusOferta.CANCELADA);
+        oferta.setUltimaModificacao(Instant.now());
+
+        Oferta ofertaSalva = ofertaRepository.save(oferta);
+
+        return montaOfertaResponseDTO(ofertaSalva);
+    }
+
     private OfertaResponseDTO mapeiaOfertaResponseDTO(Oferta entidade,
                                                       ItemInventarioDTO itemOferecidoDTO,
                                                       CartaCatalogoDTO detalhesItemOferecido,
