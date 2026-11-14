@@ -53,6 +53,15 @@ public class OfertaService {
         return montaOfertaResponseDTO(ofertaSalva);
     }
 
+    // Não precisa do ID do usuário, pois as ofertas são públicas
+    @Transactional(readOnly = true)
+    public OfertaResponseDTO buscarPorId(String ofertaId) {
+        Oferta oferta = ofertaRepository.findById(UUID.fromString(ofertaId))
+                .orElseThrow(() -> new OfertaNaoEncontradaException("Oferta não encontrada."));
+
+        return montaOfertaResponseDTO(oferta);
+    }
+
     private OfertaResponseDTO mapeiaOfertaResponseDTO(Oferta entidade,
                                                       ItemInventarioDTO itemOferecidoDTO,
                                                       CartaCatalogoDTO detalhesItemOferecido,
