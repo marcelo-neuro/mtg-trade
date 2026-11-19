@@ -1,8 +1,8 @@
 package br.com.marceloneuro.mtgtrade.iam.internal.web;
 
 import br.com.marceloneuro.mtgtrade.iam.internal.application.service.RegistroService;
-import br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto.RegistroUsuarioRequestDTO;
-import br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto.RegistroUsuarioResponseDTO;
+import br.com.marceloneuro.mtgtrade.iam.api.dto.RegistroUsuarioRequestDTO;
+import br.com.marceloneuro.mtgtrade.iam.api.dto.RegistroUsuarioResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

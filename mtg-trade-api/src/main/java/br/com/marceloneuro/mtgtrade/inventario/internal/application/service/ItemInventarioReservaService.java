@@ -3,7 +3,7 @@ package br.com.marceloneuro.mtgtrade.inventario.internal.application.service;
 import br.com.marceloneuro.mtgtrade.catalogo.api.CatalogoFacade;
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
 import br.com.marceloneuro.mtgtrade.inventario.api.dto.PedidoReservaDTO;
-import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.ItemInventarioResponseDTO;
+import br.com.marceloneuro.mtgtrade.inventario.api.dto.ItemInventarioResponseDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.ItemInventario;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.exception.ItemNaoEncontradoException;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.exception.ReservaItemException;

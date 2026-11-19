@@ -1,9 +1,9 @@
 package br.com.marceloneuro.mtgtrade.inventario.internal.web;
 
+import br.com.marceloneuro.mtgtrade.inventario.api.dto.*;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.ItemInventarioService;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.LoteItemInventarioService;
 import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.TradutorListaService;
-import br.com.marceloneuro.mtgtrade.inventario.internal.application.service.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

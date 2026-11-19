@@ -1,4 +1,4 @@
-package br.com.marceloneuro.mtgtrade.iam.internal.application.service.dto;
+package br.com.marceloneuro.mtgtrade.iam.api.dto;
 
 public record RegistroUsuarioResponseDTO(
         String nomeUsuario,
