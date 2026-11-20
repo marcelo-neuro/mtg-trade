@@ -27,11 +27,10 @@ public class Oferta {
     @Column(name = "usuario_id", nullable = false)
     private UUID usuarioId;
 
-    @Column(name = "item_inventario_id", nullable = false)
-    private UUID itemOferecido;
-
-    @Column(name = "quantidade", nullable = false)
-    private Integer quantidade;
+    // Representa um item oferecido com os campos de detalhamento.
+    // Previne que a referência seja perdida ao item do inventário ser apagado.
+    @Embedded
+    private ItemOferecido itemOferecido;
 
     @OneToMany(mappedBy = "oferta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemDesejado> itensDesejados = new ArrayList<>();
