@@ -20,13 +20,13 @@ public class ItemInventarioFacadeImpl implements InventarioFacade {
     private final ItemInventarioRepository itemInventarioRepository;
 
     @Override
-    public void reservarItem(PedidoReservaDTO pedidoReserva, String usuarioID) {
-        itemInventarioReservaService.reservarItem(pedidoReserva, usuarioID);
+    public ItemInventarioDTO reservarItem(PedidoReservaDTO pedidoReserva, String usuarioID) {
+        return itemInventarioReservaService.reservarItem(pedidoReserva, usuarioID);
     }
 
     @Override
-    public void liberarItem(PedidoReservaDTO pedidoLiberacao, String usuarioId) {
-        itemInventarioReservaService.liberarItem(pedidoLiberacao, usuarioId);
+    public ItemInventarioDTO liberarItem(PedidoReservaDTO pedidoLiberacao, String usuarioId) {
+        return itemInventarioReservaService.liberarItem(pedidoLiberacao, usuarioId);
     }
 
     @Override

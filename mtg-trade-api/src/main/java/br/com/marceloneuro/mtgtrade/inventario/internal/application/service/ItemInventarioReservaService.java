@@ -2,6 +2,7 @@ package br.com.marceloneuro.mtgtrade.inventario.internal.application.service;
 
 import br.com.marceloneuro.mtgtrade.catalogo.api.CatalogoFacade;
 import br.com.marceloneuro.mtgtrade.catalogo.api.dto.CartaCatalogoDTO;
+import br.com.marceloneuro.mtgtrade.inventario.api.dto.ItemInventarioDTO;
 import br.com.marceloneuro.mtgtrade.inventario.api.dto.PedidoReservaDTO;
 import br.com.marceloneuro.mtgtrade.inventario.api.dto.ItemInventarioResponseDTO;
 import br.com.marceloneuro.mtgtrade.inventario.internal.domain.ItemInventario;
@@ -27,7 +28,7 @@ public class ItemInventarioReservaService {
     private final CatalogoFacade catalogoFacade;
 
     @Transactional
-    public ItemInventarioResponseDTO reservarItem(PedidoReservaDTO pedidoReserva, String idUsuario) {
+    public ItemInventarioDTO reservarItem(PedidoReservaDTO pedidoReserva, String idUsuario) {
         UUID uuidCarta = UUID.fromString(pedidoReserva.itemInventarioUUID());
         UUID uuidUsuario = UUID.fromString(idUsuario);
 
@@ -48,11 +49,21 @@ public class ItemInventarioReservaService {
 
         ItemInventario itemSalvo = transferirSaldo(itemOriginal, pedidoReserva.quantidade(),  true, uuidUsuario);
 
-        return new ItemInventarioResponseDTO(itemSalvo, detalhesCarta);
+        return new ItemInventarioDTO(
+                itemSalvo.getId().toString(),
+                itemSalvo.getUsuarioId().toString(),
+                itemSalvo.getCartaCatalogoId().toString(),
+                itemSalvo.getAcabamento(),
+                itemSalvo.getPromo(),
+                itemSalvo.getQuantidade(),
+                itemSalvo.getEstado().toString(),
+                itemSalvo.getIdioma().toString(),
+                itemSalvo.getReservado()
+        );
     }
 
     @Transactional
-    public ItemInventarioResponseDTO liberarItem(PedidoReservaDTO pedidoLiberacao, String idUsuario) {
+    public ItemInventarioDTO liberarItem(PedidoReservaDTO pedidoLiberacao, String idUsuario) {
         UUID uuidCarta = UUID.fromString(pedidoLiberacao.itemInventarioUUID());
         UUID uuidUsuario = UUID.fromString(idUsuario);
 
@@ -73,7 +84,17 @@ public class ItemInventarioReservaService {
 
         ItemInventario itemSalvo = transferirSaldo(itemOriginal, pedidoLiberacao.quantidade(), false, uuidUsuario);
 
-        return new ItemInventarioResponseDTO(itemSalvo, detalhesCarta);
+        return new ItemInventarioDTO(
+                itemSalvo.getId().toString(),
+                itemSalvo.getUsuarioId().toString(),
+                itemSalvo.getCartaCatalogoId().toString(),
+                itemSalvo.getAcabamento(),
+                itemSalvo.getPromo(),
+                itemSalvo.getQuantidade(),
+                itemSalvo.getEstado().toString(),
+                itemSalvo.getIdioma().toString(),
+                itemSalvo.getReservado()
+        );
     }
 
     private ItemInventario transferirSaldo(ItemInventario itemOriginal, Integer quantidade, Boolean destinoReserva, UUID uuidUsuario) {
