@@ -5,7 +5,7 @@ import br.com.marceloneuro.mtgtrade.inventario.api.dto.PedidoReservaDTO;
 
 public interface InventarioFacade {
 
-    void reservarItem(PedidoReservaDTO pedidoReserva, String usuarioID);
-    void liberarItem(PedidoReservaDTO pedidoLiberacao, String usarioID);
+    ItemInventarioDTO reservarItem(PedidoReservaDTO pedidoReserva, String usuarioID);
+    ItemInventarioDTO liberarItem(PedidoReservaDTO pedidoLiberacao, String usarioID);
     ItemInventarioDTO buscaPorIdEUsuarioId(String itemId, String usuarioId);
 }

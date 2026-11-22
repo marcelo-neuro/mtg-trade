@@ -7,10 +7,7 @@ import br.com.marceloneuro.mtgtrade.inventario.api.dto.ItemInventarioDTO;
 import br.com.marceloneuro.mtgtrade.inventario.api.dto.PedidoReservaDTO;
 import br.com.marceloneuro.mtgtrade.oferta.api.dto.CriaOfertaRequestDTO;
 import br.com.marceloneuro.mtgtrade.oferta.api.dto.OfertaResponseDTO;
-import br.com.marceloneuro.mtgtrade.oferta.internal.domain.EstadoMinimo;
-import br.com.marceloneuro.mtgtrade.oferta.internal.domain.ItemDesejado;
-import br.com.marceloneuro.mtgtrade.oferta.internal.domain.Oferta;
-import br.com.marceloneuro.mtgtrade.oferta.internal.domain.StatusOferta;
+import br.com.marceloneuro.mtgtrade.oferta.internal.domain.*;
 import br.com.marceloneuro.mtgtrade.oferta.internal.domain.exception.DetalhesItemDesejadoNaoEncontradoException;
 import br.com.marceloneuro.mtgtrade.oferta.internal.domain.exception.OfertaNaoEncontradaException;
 import br.com.marceloneuro.mtgtrade.oferta.internal.infrastructure.repository.OfertaRepository;
@@ -38,12 +35,20 @@ public class OfertaService {
         PedidoReservaDTO pedidoReserva = new PedidoReservaDTO(request.itemInventarioOfertadoId(),
                 request.quantidade());
 
-        inventarioFacade.reservarItem(pedidoReserva, usuarioId);
+        ItemInventarioDTO itemReservado = inventarioFacade.reservarItem(pedidoReserva, usuarioId);
+
+        ItemOferecido itemOferecido = new ItemOferecido();
+        itemOferecido.setItemOferecidoId(UUID.fromString(itemReservado.id()));
+        itemOferecido.setCartaCatalogoId(UUID.fromString(itemReservado.cartaCatalogoId()));
+        itemOferecido.setAcabamento(itemReservado.acabamento());
+        itemOferecido.setPromo(itemReservado.promo());
+        itemOferecido.setEstado(itemReservado.estado());
+        itemOferecido.setIdioma(itemReservado.idioma());
+        itemOferecido.setQuantidade(request.quantidade());
 
         Oferta oferta = new Oferta();
         oferta.setUsuarioId(UUID.fromString(usuarioId));
-        oferta.setItemOferecido(UUID.fromString(request.itemInventarioOfertadoId()));
-        oferta.setQuantidade(request.quantidade());
+        oferta.setItemOferecido(itemOferecido);
         oferta.setStatus(StatusOferta.ATIVA);
         oferta.setUltimaModificacao(Instant.now());
 
@@ -71,7 +76,10 @@ public class OfertaService {
                 .orElseThrow(() -> new OfertaNaoEncontradaException("Oferta ativa não encontrada na conta do usuário."));
 
         inventarioFacade
-                .liberarItem(new PedidoReservaDTO(oferta.getItemOferecido().toString(), oferta.getQuantidade()), usuarioId);
+                .liberarItem(new PedidoReservaDTO(
+                        oferta.getItemOferecido().getItemOferecidoId().toString(),
+                        oferta.getItemOferecido().getQuantidade()
+                ), usuarioId);
 
         oferta.setStatus(StatusOferta.CANCELADA);
         oferta.setUltimaModificacao(Instant.now());
@@ -82,7 +90,6 @@ public class OfertaService {
     }
 
     private OfertaResponseDTO mapeiaOfertaResponseDTO(Oferta entidade,
-                                                      ItemInventarioDTO itemOferecidoDTO,
                                                       CartaCatalogoDTO detalhesItemOferecido,
                                                       List<OfertaResponseDTO.ItemDesejadoResponseDTO> itensDesejadosResponse) {
         return new OfertaResponseDTO(
@@ -91,12 +98,12 @@ public class OfertaService {
                 entidade.getStatus(),
                 entidade.getUltimaModificacao(),
                 new OfertaResponseDTO.ItemOferecidoResponseDTO(
-                        itemOferecidoDTO.id(),
-                        itemOferecidoDTO.cartaCatalogoId(),
-                        itemOferecidoDTO.idioma(),
-                        itemOferecidoDTO.estado(),
-                        itemOferecidoDTO.acabamento(),
-                        itemOferecidoDTO.promo(),
+                        entidade.getItemOferecido().getItemOferecidoId().toString(),
+                        entidade.getItemOferecido().getCartaCatalogoId().toString(),
+                        entidade.getItemOferecido().getIdioma(),
+                        entidade.getItemOferecido().getEstado(),
+                        entidade.getItemOferecido().getAcabamento(),
+                        entidade.getItemOferecido().getPromo(),
                         detalhesItemOferecido.nome(),
                         detalhesItemOferecido.imagemFrenteUrl(),
                         detalhesItemOferecido.siglaEdicao(),
@@ -113,7 +120,7 @@ public class OfertaService {
                 .forEach(itemDesejado -> {
                     if (!detalhesCartaMap.containsKey(itemDesejado.getCartaCatalogoId())) {
                         throw new DetalhesItemDesejadoNaoEncontradoException(
-                                "Detalhe do item desejado não encontrado. ID: " + itemDesejado.getIdiomasDesejados()
+                                "Detalhe do item desejado não encontrado. ID: " + itemDesejado.getCartaCatalogoId()
                         );
                     }
 
@@ -184,18 +191,17 @@ public class OfertaService {
     }
 
     private OfertaResponseDTO montaOfertaResponseDTO(Oferta entidade) {
-        ItemInventarioDTO itemOferecido = inventarioFacade
-                .buscaPorIdEUsuarioId(entidade.getItemOferecido().toString(), entidade.getUsuarioId().toString());
+        ItemOferecido itemOferecido = entidade.getItemOferecido();
 
         Set<UUID> setCartaCatalogoId = mapeiaSetCartaCatalogoUuid(entidade);
-        setCartaCatalogoId.add(UUID.fromString(itemOferecido.cartaCatalogoId()));
+        setCartaCatalogoId.add(itemOferecido.getItemOferecidoId());
 
         Map<UUID, CartaCatalogoDTO> detalhesCartaMap = catalogoFacade.buscaPorConjuntoIdsMap(setCartaCatalogoId);
 
         List<OfertaResponseDTO.ItemDesejadoResponseDTO> itensDesejadosResponse =
                 mapeiaListaItensDesejadosResponse(entidade, detalhesCartaMap);
 
-        CartaCatalogoDTO detalhesItemOferecido = detalhesCartaMap.get(UUID.fromString(itemOferecido.cartaCatalogoId()));
-        return mapeiaOfertaResponseDTO(entidade, itemOferecido, detalhesItemOferecido, itensDesejadosResponse);
+        CartaCatalogoDTO detalhesItemOferecido = detalhesCartaMap.get(UUID.fromString(itemOferecido.getCartaCatalogoId().toString()));
+        return mapeiaOfertaResponseDTO(entidade, detalhesItemOferecido, itensDesejadosResponse);
     }
 }
