@@ -12,6 +12,8 @@ import br.com.marceloneuro.mtgtrade.oferta.internal.domain.exception.DetalhesIte
 import br.com.marceloneuro.mtgtrade.oferta.internal.domain.exception.OfertaNaoEncontradaException;
 import br.com.marceloneuro.mtgtrade.oferta.internal.infrastructure.repository.OfertaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,6 +91,22 @@ public class OfertaService {
         return montaOfertaResponseDTO(ofertaSalva);
     }
 
+    @Transactional(readOnly = true)
+    public Page<OfertaResponseDTO> buscarOfertasAtivasPorUsuario(String usuarioId, Pageable pageable) {
+        Page<Oferta> ofertas = ofertaRepository
+                .findByUsuarioIdAndStatus(UUID.fromString(usuarioId), StatusOferta.ATIVA, pageable);
+
+        return montaPaginaOfertaResponseDTO(ofertas, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<OfertaResponseDTO> buscarOfertasAtivas(Pageable pageable) {
+        Page<Oferta> ofertas = ofertaRepository
+                .findByStatus(StatusOferta.ATIVA, pageable);
+
+        return montaPaginaOfertaResponseDTO(ofertas, pageable);
+    }
+
     private OfertaResponseDTO mapeiaOfertaResponseDTO(Oferta entidade,
                                                       CartaCatalogoDTO detalhesItemOferecido,
                                                       List<OfertaResponseDTO.ItemDesejadoResponseDTO> itensDesejadosResponse) {
@@ -100,6 +118,7 @@ public class OfertaService {
                 new OfertaResponseDTO.ItemOferecidoResponseDTO(
                         entidade.getItemOferecido().getItemOferecidoId().toString(),
                         entidade.getItemOferecido().getCartaCatalogoId().toString(),
+                        entidade.getItemOferecido().getQuantidade(),
                         entidade.getItemOferecido().getIdioma(),
                         entidade.getItemOferecido().getEstado(),
                         entidade.getItemOferecido().getAcabamento(),
@@ -128,9 +147,9 @@ public class OfertaService {
                     itensDesejadosResponse.add(new OfertaResponseDTO.ItemDesejadoResponseDTO(
                             itemDesejado.getId().toString(),
                             itemDesejado.getCartaCatalogoId().toString(),
-                            Arrays.stream(itemDesejado.getAcabamentos().split(",")).toList(),
-                            Arrays.stream(itemDesejado.getTiposPromo().split(",")).toList(),
-                            Arrays.stream(itemDesejado.getIdiomasDesejados().split(",")).toList(),
+                            extrairLista(itemDesejado.getAcabamentos()),
+                            extrairLista(itemDesejado.getTiposPromo()),
+                            extrairLista(itemDesejado.getIdiomasDesejados()),
                             itemDesejado.getQuantidade(),
                             itemDesejado.getEstadoMinimo().toString(),
                             detalheItemDesejado.nome(),
@@ -194,14 +213,45 @@ public class OfertaService {
         ItemOferecido itemOferecido = entidade.getItemOferecido();
 
         Set<UUID> setCartaCatalogoId = mapeiaSetCartaCatalogoUuid(entidade);
-        setCartaCatalogoId.add(itemOferecido.getItemOferecidoId());
+        setCartaCatalogoId.add(itemOferecido.getCartaCatalogoId());
 
         Map<UUID, CartaCatalogoDTO> detalhesCartaMap = catalogoFacade.buscaPorConjuntoIdsMap(setCartaCatalogoId);
 
         List<OfertaResponseDTO.ItemDesejadoResponseDTO> itensDesejadosResponse =
                 mapeiaListaItensDesejadosResponse(entidade, detalhesCartaMap);
 
-        CartaCatalogoDTO detalhesItemOferecido = detalhesCartaMap.get(UUID.fromString(itemOferecido.getCartaCatalogoId().toString()));
+        CartaCatalogoDTO detalhesItemOferecido = detalhesCartaMap.get(itemOferecido.getCartaCatalogoId());
         return mapeiaOfertaResponseDTO(entidade, detalhesItemOferecido, itensDesejadosResponse);
+    }
+
+    private Page<OfertaResponseDTO> montaPaginaOfertaResponseDTO(Page<Oferta> ofertas, Pageable pageable) {
+        if (ofertas.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // Extrai todos os cartaCatalogoId's de uma vez
+        Set<UUID> setCartaCatalogoId = new HashSet<>();
+        ofertas.forEach(oferta -> {
+            setCartaCatalogoId.add(oferta.getItemOferecido().getCartaCatalogoId());
+
+            oferta.getItensDesejados()
+                    .forEach(itemDesejado -> setCartaCatalogoId.add(itemDesejado.getCartaCatalogoId()));
+        });
+
+        Map<UUID, CartaCatalogoDTO> mapDetalhesCartas = catalogoFacade.buscaPorConjuntoIdsMap(setCartaCatalogoId);
+
+
+        return ofertas.map(oferta -> mapeiaOfertaResponseDTO(
+                oferta,
+                mapDetalhesCartas.get(oferta.getItemOferecido().getCartaCatalogoId()),
+                mapeiaListaItensDesejadosResponse(oferta, mapDetalhesCartas)
+        ));
+    }
+
+    private List<String> extrairLista(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(valor.split(","));
     }
 }
