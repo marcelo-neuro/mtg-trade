@@ -2,6 +2,7 @@ package br.com.marceloneuro.mtgtrade.oferta.internal.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ public class Oferta {
     @Embedded
     private ItemOferecido itemOferecido;
 
+    @BatchSize(size = 20)
     @OneToMany(mappedBy = "oferta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemDesejado> itensDesejados = new ArrayList<>();
 
