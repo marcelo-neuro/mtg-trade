@@ -99,6 +99,14 @@ public class OfertaService {
         return montaPaginaOfertaResponseDTO(ofertas, pageable);
     }
 
+    @Transactional(readOnly = true)
+    public Page<OfertaResponseDTO> buscarOfertasAtivas(Pageable pageable) {
+        Page<Oferta> ofertas = ofertaRepository
+                .findByStatus(StatusOferta.ATIVA, pageable);
+
+        return montaPaginaOfertaResponseDTO(ofertas, pageable);
+    }
+
     private OfertaResponseDTO mapeiaOfertaResponseDTO(Oferta entidade,
                                                       CartaCatalogoDTO detalhesItemOferecido,
                                                       List<OfertaResponseDTO.ItemDesejadoResponseDTO> itensDesejadosResponse) {
