@@ -158,9 +158,9 @@ public class OfertaService {
                     itensDesejadosResponse.add(new OfertaResponseDTO.ItemDesejadoResponseDTO(
                             itemDesejado.getId().toString(),
                             itemDesejado.getCartaCatalogoId().toString(),
-                            Arrays.stream(itemDesejado.getAcabamentos().split(",")).toList(),
-                            Arrays.stream(itemDesejado.getTiposPromo().split(",")).toList(),
-                            Arrays.stream(itemDesejado.getIdiomasDesejados().split(",")).toList(),
+                            extrairLista(itemDesejado.getAcabamentos()),
+                            extrairLista(itemDesejado.getTiposPromo()),
+                            extrairLista(itemDesejado.getIdiomasDesejados()),
                             itemDesejado.getQuantidade(),
                             itemDesejado.getEstadoMinimo().toString(),
                             detalheItemDesejado.nome(),
@@ -233,5 +233,12 @@ public class OfertaService {
 
         CartaCatalogoDTO detalhesItemOferecido = detalhesCartaMap.get(itemOferecido.getCartaCatalogoId());
         return mapeiaOfertaResponseDTO(entidade, detalhesItemOferecido, itensDesejadosResponse);
+    }
+
+    private List<String> extrairLista(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(valor.split(","));
     }
 }
