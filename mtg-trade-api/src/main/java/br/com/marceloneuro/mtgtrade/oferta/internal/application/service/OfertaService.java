@@ -12,6 +12,8 @@ import br.com.marceloneuro.mtgtrade.oferta.internal.domain.exception.DetalhesIte
 import br.com.marceloneuro.mtgtrade.oferta.internal.domain.exception.OfertaNaoEncontradaException;
 import br.com.marceloneuro.mtgtrade.oferta.internal.infrastructure.repository.OfertaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,6 +89,34 @@ public class OfertaService {
         Oferta ofertaSalva = ofertaRepository.save(oferta);
 
         return montaOfertaResponseDTO(ofertaSalva);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<OfertaResponseDTO> buscarOfertasAtivasPorUsuario(String usuarioId, Pageable pageable) {
+        Page<Oferta> ofertas = ofertaRepository
+                .findByUsuarioIdAndStatus(UUID.fromString(usuarioId), StatusOferta.ATIVA, pageable);
+
+        if (ofertas.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // Extrai todos os cartaCatalogoId's de uma vez
+        Set<UUID> setCartaCatalogoId = new HashSet<>();
+        ofertas.forEach(oferta -> {
+           setCartaCatalogoId.add(oferta.getItemOferecido().getCartaCatalogoId());
+
+           oferta.getItensDesejados()
+                   .forEach(itemDesejado -> setCartaCatalogoId.add(itemDesejado.getCartaCatalogoId()));
+        });
+
+        Map<UUID, CartaCatalogoDTO> mapDetalhesCartas = catalogoFacade.buscaPorConjuntoIdsMap(setCartaCatalogoId);
+
+
+        return ofertas.map(oferta -> mapeiaOfertaResponseDTO(
+                oferta,
+                mapDetalhesCartas.get(oferta.getItemOferecido().getCartaCatalogoId()),
+                mapeiaListaItensDesejadosResponse(oferta, mapDetalhesCartas)
+        ));
     }
 
     private OfertaResponseDTO mapeiaOfertaResponseDTO(Oferta entidade,
@@ -194,14 +224,14 @@ public class OfertaService {
         ItemOferecido itemOferecido = entidade.getItemOferecido();
 
         Set<UUID> setCartaCatalogoId = mapeiaSetCartaCatalogoUuid(entidade);
-        setCartaCatalogoId.add(itemOferecido.getItemOferecidoId());
+        setCartaCatalogoId.add(itemOferecido.getCartaCatalogoId());
 
         Map<UUID, CartaCatalogoDTO> detalhesCartaMap = catalogoFacade.buscaPorConjuntoIdsMap(setCartaCatalogoId);
 
         List<OfertaResponseDTO.ItemDesejadoResponseDTO> itensDesejadosResponse =
                 mapeiaListaItensDesejadosResponse(entidade, detalhesCartaMap);
 
-        CartaCatalogoDTO detalhesItemOferecido = detalhesCartaMap.get(UUID.fromString(itemOferecido.getCartaCatalogoId().toString()));
+        CartaCatalogoDTO detalhesItemOferecido = detalhesCartaMap.get(itemOferecido.getCartaCatalogoId());
         return mapeiaOfertaResponseDTO(entidade, detalhesItemOferecido, itensDesejadosResponse);
     }
 }
