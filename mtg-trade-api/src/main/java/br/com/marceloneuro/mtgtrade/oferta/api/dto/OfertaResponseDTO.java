@@ -17,6 +17,7 @@ public record OfertaResponseDTO(
     public record ItemOferecidoResponseDTO(
             String itemInventarioId,
             String cartaCatalogoId,
+            Integer quantidade,
             String idioma,
             String estado,
             String acabamento,

@@ -130,6 +130,7 @@ public class OfertaService {
                 new OfertaResponseDTO.ItemOferecidoResponseDTO(
                         entidade.getItemOferecido().getItemOferecidoId().toString(),
                         entidade.getItemOferecido().getCartaCatalogoId().toString(),
+                        entidade.getItemOferecido().getQuantidade(),
                         entidade.getItemOferecido().getIdioma(),
                         entidade.getItemOferecido().getEstado(),
                         entidade.getItemOferecido().getAcabamento(),
