@@ -96,27 +96,7 @@ public class OfertaService {
         Page<Oferta> ofertas = ofertaRepository
                 .findByUsuarioIdAndStatus(UUID.fromString(usuarioId), StatusOferta.ATIVA, pageable);
 
-        if (ofertas.isEmpty()) {
-            return Page.empty(pageable);
-        }
-
-        // Extrai todos os cartaCatalogoId's de uma vez
-        Set<UUID> setCartaCatalogoId = new HashSet<>();
-        ofertas.forEach(oferta -> {
-           setCartaCatalogoId.add(oferta.getItemOferecido().getCartaCatalogoId());
-
-           oferta.getItensDesejados()
-                   .forEach(itemDesejado -> setCartaCatalogoId.add(itemDesejado.getCartaCatalogoId()));
-        });
-
-        Map<UUID, CartaCatalogoDTO> mapDetalhesCartas = catalogoFacade.buscaPorConjuntoIdsMap(setCartaCatalogoId);
-
-
-        return ofertas.map(oferta -> mapeiaOfertaResponseDTO(
-                oferta,
-                mapDetalhesCartas.get(oferta.getItemOferecido().getCartaCatalogoId()),
-                mapeiaListaItensDesejadosResponse(oferta, mapDetalhesCartas)
-        ));
+        return montaPaginaOfertaResponseDTO(ofertas, pageable);
     }
 
     private OfertaResponseDTO mapeiaOfertaResponseDTO(Oferta entidade,
@@ -234,6 +214,30 @@ public class OfertaService {
 
         CartaCatalogoDTO detalhesItemOferecido = detalhesCartaMap.get(itemOferecido.getCartaCatalogoId());
         return mapeiaOfertaResponseDTO(entidade, detalhesItemOferecido, itensDesejadosResponse);
+    }
+
+    private Page<OfertaResponseDTO> montaPaginaOfertaResponseDTO(Page<Oferta> ofertas, Pageable pageable) {
+        if (ofertas.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // Extrai todos os cartaCatalogoId's de uma vez
+        Set<UUID> setCartaCatalogoId = new HashSet<>();
+        ofertas.forEach(oferta -> {
+            setCartaCatalogoId.add(oferta.getItemOferecido().getCartaCatalogoId());
+
+            oferta.getItensDesejados()
+                    .forEach(itemDesejado -> setCartaCatalogoId.add(itemDesejado.getCartaCatalogoId()));
+        });
+
+        Map<UUID, CartaCatalogoDTO> mapDetalhesCartas = catalogoFacade.buscaPorConjuntoIdsMap(setCartaCatalogoId);
+
+
+        return ofertas.map(oferta -> mapeiaOfertaResponseDTO(
+                oferta,
+                mapDetalhesCartas.get(oferta.getItemOferecido().getCartaCatalogoId()),
+                mapeiaListaItensDesejadosResponse(oferta, mapDetalhesCartas)
+        ));
     }
 
     private List<String> extrairLista(String valor) {
