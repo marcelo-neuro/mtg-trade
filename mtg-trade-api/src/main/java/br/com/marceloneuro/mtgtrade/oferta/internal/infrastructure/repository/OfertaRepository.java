@@ -14,4 +14,6 @@ public interface OfertaRepository extends JpaRepository<Oferta, UUID> {
     Optional<Oferta> findByIdAndUsuarioIdAndStatus(UUID id, UUID usuarioId, StatusOferta status);
 
     Page<Oferta> findByUsuarioIdAndStatus(UUID usuarioId, StatusOferta status, Pageable pageable);
+
+    Page<Oferta> findByStatus(StatusOferta statusOferta, Pageable pageable);
 }
